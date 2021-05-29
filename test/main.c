@@ -1,6 +1,10 @@
 #include <stdio.h>
 //#include <stdlib.h>
 
+char toPrintableChar(char ch);
+int read16(FILE *fp, char* buffer);
+void print16(char* buffer, int bufferSz);
+
 int main()
 {
     FILE *fp;
@@ -13,38 +17,28 @@ int main()
         return 1;
     }
 
-    int isEof = 0;
-
-    char row[17];
-    row[16] = 0;
-    while (! isEof)
+    const int BUFFER_SIZE = 16;
+    char buffer[BUFFER_SIZE];
+    int bytesRead = BUFFER_SIZE;
+    while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
     {
-        for (int counter = 0; counter < 16; counter++)
-        {
-            row[counter] = fgetc(fp);
-            if (row[counter] == EOF)
-            {
-                row[counter] = 0;
-                isEof = EOF;
-                break;
-            }
-        }
-        
-        printf("%02X %02X %02X %02X %02X %02X %02X %02X  ", row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
-        printf("%02X %02X %02X %02X %02X %02X %02X %02X  ", row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
-        printf("%s\n", row);
-        /*
-        while ((ch = fgetc(fp)) != EOF)
-        {
-            printf("%02X ", ch);
-        }
-
-        if (ch == EOF)
-        { break; }*/
+        print16(buffer, bytesRead);
     }
+    print16(buffer, bytesRead);
     fclose(fp);
 
     return 0;
+}
+
+inline char toPrintableChar(char ch)
+{
+    if (ch < 0x20)
+    { return '.'; }
+
+    if (ch == 0x3F)
+    { return '.'; }
+
+    return ch;
 }
 
 /*
@@ -64,4 +58,38 @@ inline int read16(FILE *fp, char* buffer)
     }
 
     return 16;
+}
+
+inline void print16(char* buffer, int bufferSz)
+{
+    for (int counter = 0; counter < 8; counter++)
+    {
+        if (counter >= bufferSz)
+        {
+            printf("   ");
+        } else {
+            printf("%02X ", buffer[counter]);
+        }
+    }
+
+    printf(" ");
+
+    for (int counter = 8; counter < 16; counter++)
+    {
+        if (counter >= bufferSz)
+        {
+            printf("   ");
+        } else {
+            printf("%02X ", buffer[counter]);
+        }
+    }
+
+    printf("  ");
+
+    for (int counter = 0; counter < 16 && counter < bufferSz; counter++)
+    {
+        printf("%c", toPrintableChar(buffer[counter]));
+    }
+
+    printf("\n");
 }
