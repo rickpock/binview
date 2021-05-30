@@ -5,6 +5,30 @@ unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
 void print16(unsigned char* buffer, int bufferSz);
 
+enum printColor
+{
+    NONE = -1,
+    BLACK = 0,
+    RED = 1,
+    GREEN = 2,
+    BROWN = 3,
+    BLUE = 4,
+    PURPLE = 5,
+    CYAN = 6,
+    GRAY = 7,
+    DARK_GRAY = 8 + 0,
+    LIGHT_RED = 8 + 1,
+    LIGHT_GREEN = 8 + 2,
+    YELLOW = 8 + 3,
+    LIGHT_BLUE = 8 + 4,
+    LIGHT_PURPLE = 8 + 5,
+    LIGHT_CYAN = 8 + 6,
+    WHITE = 8 +7
+};
+
+void setColor(enum printColor color);
+
+
 int main(int argc, char **argv)
 {
     if (argc < 2)
@@ -34,6 +58,22 @@ int main(int argc, char **argv)
     fclose(fp);
 
     return 0;
+}
+
+void setColor(enum printColor color)
+{
+    if (color == NONE)
+    {
+        printf("\e[0m");
+        return;
+    }
+
+    if (color & 0x8)
+    {
+        printf("\e[1;3%dm", color & 0x7);
+    } else {
+        printf("\e[3%dm", color);
+    }
 }
 
 inline unsigned char toPrintableChar(unsigned char ch)
