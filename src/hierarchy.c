@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "hierarchy.h"
 
 Node *newNode(int color, char *description, Segment *segments, int segmentCnt, Node *children, int childCnt)
@@ -44,11 +45,16 @@ void deleteNode(Node *node)
 
 void findColors(Node rootNode, long offset, long length, int *result)
 {
-    for (int childIdx; childIdx < rootNode.childCnt; childIdx++)
+    for (long resultIdx = 0; resultIdx < length; resultIdx++)
+    {
+        result[resultIdx] = rootNode.color;
+    }
+
+    for (int childIdx = 0; childIdx < rootNode.childCnt; childIdx++)
     {
         Node childNode = rootNode.children[childIdx];
         
-        for (int segmentIdx; segmentIdx < childNode.segmentCnt; segmentIdx++)
+        for (int segmentIdx = 0; segmentIdx < childNode.segmentCnt; segmentIdx++)
         {
             Segment segment = childNode.segments[segmentIdx];
 
@@ -56,9 +62,9 @@ void findColors(Node rootNode, long offset, long length, int *result)
             {
                 // TODO: Recur
                 long startIdx = (segment.offset < offset) ? 0 : segment.offset - offset;
-                long endIdx = (segment.offset + segment.length > offset + length) ? length : (offset + length) - (segment.offset + segment.length);
+                long endIdx = (segment.offset + segment.length > offset + length) ? length : segment.offset + segment.length;
 
-                for (long resultIdx = startIdx; resultIdx++; resultIdx++)
+                for (long resultIdx = startIdx; resultIdx < endIdx; resultIdx++)
                 {
                     result[resultIdx] = childNode.color;
                 }

@@ -6,7 +6,7 @@
 
 unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
-void print16(unsigned char* buffer, int bufferSz);
+void print16(unsigned char* buffer, int bufferSz, int colors[]);
 
 void setColor(enum printColor color);
 
@@ -44,12 +44,16 @@ int main(int argc, char **argv)
     int bytesRead = BUFFER_SIZE;
     setColor(GREEN);
     long offset = 0;
+    int colors[BUFFER_SIZE];
     while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
     {
-        print16(buffer, bytesRead);
+        findColors(*root, offset, BUFFER_SIZE, colors);
+
+        print16(buffer, bytesRead, colors);
         offset += BUFFER_SIZE;
     }
-    print16(buffer, bytesRead);
+    findColors(*root, offset, BUFFER_SIZE, colors);
+    print16(buffer, bytesRead, colors);
     fclose(fp);
 
     return 0;
@@ -101,21 +105,17 @@ inline int read16(FILE *fp, unsigned char* buffer)
     return 16;
 }
 
-inline void print16(unsigned char* buffer, int bufferSz)
+inline void print16(unsigned char* buffer, int bufferSz, int colors[])
 {
     for (int counter = 0; counter < 8; counter++)
     {
+        setColor(colors[counter]);
+
         if (counter >= bufferSz)
         {
             printf("   ");
         } else {
             printf("%02X ", buffer[counter]);
-        }
-
-
-        if (counter == 3)
-        {
-            setColor(NONE);
         }
     }
 
@@ -123,6 +123,8 @@ inline void print16(unsigned char* buffer, int bufferSz)
 
     for (int counter = 8; counter < 16; counter++)
     {
+        setColor(colors[counter]);
+
         if (counter >= bufferSz)
         {
             printf("   ");
