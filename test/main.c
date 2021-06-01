@@ -1,33 +1,14 @@
 #include <stdio.h>
 //#include <stdlib.h>
 
+#include "../src/hierarchy.h"
+#include "../src/color.h"
+
 unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
 void print16(unsigned char* buffer, int bufferSz);
 
-enum printColor
-{
-    NONE = -1,
-    BLACK = 0,
-    RED = 1,
-    GREEN = 2,
-    BROWN = 3,
-    BLUE = 4,
-    PURPLE = 5,
-    CYAN = 6,
-    GRAY = 7,
-    DARK_GRAY = 8 + 0,
-    LIGHT_RED = 8 + 1,
-    LIGHT_GREEN = 8 + 2,
-    YELLOW = 8 + 3,
-    LIGHT_BLUE = 8 + 4,
-    LIGHT_PURPLE = 8 + 5,
-    LIGHT_CYAN = 8 + 6,
-    WHITE = 8 +7
-};
-
 void setColor(enum printColor color);
-
 
 int main(int argc, char **argv)
 {
@@ -47,12 +28,26 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    Segment magicSegments[1];
+    magicSegments[0].offset = 0;
+    magicSegments[0].length = 4;
+
+    Node *magic = newNode(BLUE, "Magic Number", magicSegments, 1, NULL, 0);
+
+    Segment rootSegments[1];
+    rootSegments[0].offset = 0;
+    rootSegments[0].length = 128;
+    Node *root = newNode(NONE, "Whole file", rootSegments, 1, magic, 1);
+
     const int BUFFER_SIZE = 16;
     unsigned char buffer[BUFFER_SIZE];
     int bytesRead = BUFFER_SIZE;
+    setColor(GREEN);
+    long offset = 0;
     while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
     {
         print16(buffer, bytesRead);
+        offset += BUFFER_SIZE;
     }
     print16(buffer, bytesRead);
     fclose(fp);
@@ -115,6 +110,12 @@ inline void print16(unsigned char* buffer, int bufferSz)
             printf("   ");
         } else {
             printf("%02X ", buffer[counter]);
+        }
+
+
+        if (counter == 3)
+        {
+            setColor(NONE);
         }
     }
 
