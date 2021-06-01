@@ -42,33 +42,3 @@ void deleteNode(Node *node)
 
     free(node);
 }
-
-void findColors(Node rootNode, long offset, long length, int *result)
-{
-    for (long resultIdx = 0; resultIdx < length; resultIdx++)
-    {
-        result[resultIdx] = rootNode.color;
-    }
-
-    for (int childIdx = 0; childIdx < rootNode.childCnt; childIdx++)
-    {
-        Node childNode = rootNode.children[childIdx];
-        
-        for (int segmentIdx = 0; segmentIdx < childNode.segmentCnt; segmentIdx++)
-        {
-            Segment segment = childNode.segments[segmentIdx];
-
-            if (segment.offset < offset + length && segment.offset + segment.length > offset)
-            {
-                // TODO: Recur
-                long startIdx = (segment.offset < offset) ? 0 : segment.offset - offset;
-                long endIdx = (segment.offset + segment.length > offset + length) ? length : segment.offset + segment.length;
-
-                for (long resultIdx = startIdx; resultIdx < endIdx; resultIdx++)
-                {
-                    result[resultIdx] = childNode.color;
-                }
-            }
-        }
-    }
-}

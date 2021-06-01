@@ -10,6 +10,8 @@ void print16(unsigned char* buffer, int bufferSz, int colors[]);
 
 void setColor(enum printColor color);
 
+void findColors(Node rootNode, long offset, long length, int *result);
+
 int main(int argc, char **argv)
 {
     if (argc < 2)
@@ -42,7 +44,6 @@ int main(int argc, char **argv)
     const int BUFFER_SIZE = 16;
     unsigned char buffer[BUFFER_SIZE];
     int bytesRead = BUFFER_SIZE;
-    setColor(GREEN);
     long offset = 0;
     int colors[BUFFER_SIZE];
     while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
@@ -141,4 +142,34 @@ inline void print16(unsigned char* buffer, int bufferSz, int colors[])
     }
 
     printf("\n");
+}
+
+void findColors(Node rootNode, long offset, long length, int *result)
+{
+    for (long resultIdx = 0; resultIdx < length; resultIdx++)
+    {
+        result[resultIdx] = rootNode.color;
+    }
+
+    for (int childIdx = 0; childIdx < rootNode.childCnt; childIdx++)
+    {
+        Node childNode = rootNode.children[childIdx];
+        
+        for (int segmentIdx = 0; segmentIdx < childNode.segmentCnt; segmentIdx++)
+        {
+            Segment segment = childNode.segments[segmentIdx];
+
+            if (segment.offset < offset + length && segment.offset + segment.length > offset)
+            {
+                // TODO: Recur?
+                long startIdx = (segment.offset < offset) ? 0 : segment.offset - offset;
+                long endIdx = (segment.offset + segment.length > offset + length) ? length : segment.offset + segment.length;
+
+                for (long resultIdx = startIdx; resultIdx < endIdx; resultIdx++)
+                {
+                    result[resultIdx] = childNode.color;
+                }
+            }
+        }
+    }
 }
