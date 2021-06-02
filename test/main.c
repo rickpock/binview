@@ -110,12 +110,11 @@ inline void print16(unsigned char* buffer, int bufferSz, int colors[])
 {
     for (int counter = 0; counter < 8; counter++)
     {
-        setColor(colors[counter]);
-
         if (counter >= bufferSz)
         {
             printf("   ");
         } else {
+            setColor(colors[counter]);
             printf("%02X ", buffer[counter]);
         }
     }
@@ -124,12 +123,11 @@ inline void print16(unsigned char* buffer, int bufferSz, int colors[])
 
     for (int counter = 8; counter < 16; counter++)
     {
-        setColor(colors[counter]);
-
         if (counter >= bufferSz)
         {
             printf("   ");
         } else {
+            setColor(colors[counter]);
             printf("%02X ", buffer[counter]);
         }
     }
@@ -163,7 +161,7 @@ void findColors(Node rootNode, long offset, long length, int *result)
             {
                 // TODO: Recur?
                 long startIdx = (segment.offset < offset) ? 0 : segment.offset - offset;
-                long endIdx = (segment.offset + segment.length > offset + length) ? length : segment.offset + segment.length;
+                long endIdx = (segment.offset + segment.length > offset + length) ? length : segment.offset + segment.length - offset;
 
                 for (long resultIdx = startIdx; resultIdx < endIdx; resultIdx++)
                 {
