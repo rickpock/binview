@@ -1,44 +1,45 @@
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include "hierarchy.h"
 
-Node *newNode(int color, char *description, Segment *segments, int segmentCnt, Node *children, int childCnt)
+void newNode(int color, char *description, Segment *segments, int segmentCnt, Node *children, int childCnt, Node *node)
 {
-    Node *new = (Node *)malloc(sizeof(Node));
+    //node = (Node *)malloc(sizeof(Node));
     
-    new->color = color;
-    new->description = malloc(strlen(description) + 1);
-    strcpy(new->description, description);
+    node->color = color;
+    node->description = malloc(strlen(description) + 1);
+    strcpy(node->description, description);
 
     if (segmentCnt)
     {
-        new->segments = malloc(sizeof(Segment) * segmentCnt);
-        memcpy(new->segments, segments, sizeof(Segment) * segmentCnt);
-        new->segmentCnt = segmentCnt;
+        node->segments = malloc(sizeof(Segment) * segmentCnt);
+        memcpy(node->segments, segments, sizeof(Segment) * segmentCnt);
+        node->segmentCnt = segmentCnt;
     } else {
-        new->segments = NULL;
+        node->segments = NULL;
     }
     
     if (childCnt)
     {
-        new->children = malloc(sizeof(Node) * childCnt);
-        memcpy(new->children, children, sizeof(Node) * childCnt);
-        new->childCnt = childCnt;
+        node->children = malloc(sizeof(Node) * childCnt);
+        memcpy(node->children, children, sizeof(Node) * childCnt);
+        node->childCnt = childCnt;
     } else {
-        new->children = NULL;
+        node->children = NULL;
     }
-
-    return new;
 }
 
-void deleteNode(Node *node)
+void deleteNode(Node node)
 {
-    free(node->description);
-    if (node->segments)
-    { free(node->segments); }
-    if (node->children)
-    { free(node->children); }
-
-    free(node);
+    free(node.description);
+    if (node.segments)
+    { free(node.segments); }
+    if (node.children)
+    {
+        for (int childIdx = 0; childIdx < node.childCnt; childIdx++)
+        {
+            deleteNode(node.children[childIdx]);
+        }
+        free(node.children);
+    }
 }

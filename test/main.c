@@ -30,32 +30,49 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    Segment magicSegments[1];
-    magicSegments[0].offset = 0;
-    magicSegments[0].length = 4;
+    // Segment magicSegments[1];
+    // magicSegments[0].offset = 0;
+    // magicSegments[0].length = 4;
 
-    Node *magic = newNode(BLUE, "Magic Number", magicSegments, 1, NULL, 0);
+    // Node *magic = newNode(BLUE, "Magic Number", magicSegments, 1, NULL, 0);
+
+    Segment headerSegments[1];
+    headerSegments[0].offset = 0;
+    headerSegments[0].length = 69;
+
+    Node children[2];
+    newNode(GREEN, "Local file header", headerSegments, 1, NULL, 0, &children[0]);
+
+    Segment eocdSegments[1];
+    eocdSegments[0].offset = 168;
+    eocdSegments[0].length = 22;
+
+    newNode(YELLOW, "End of central directory record", eocdSegments, 1, NULL, 0, &children[1]);
 
     Segment rootSegments[1];
     rootSegments[0].offset = 0;
     rootSegments[0].length = 128;
-    Node *root = newNode(NONE, "Whole file", rootSegments, 1, magic, 1);
+    Node root;
+    newNode(NONE, "Whole file", rootSegments, 1, children, 2, &root);
 
     const int BUFFER_SIZE = 16;
     unsigned char buffer[BUFFER_SIZE];
     int bytesRead = BUFFER_SIZE;
     long offset = 0;
     int colors[BUFFER_SIZE];
+    
     while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
     {
-        findColors(*root, offset, BUFFER_SIZE, colors);
+        findColors(root, offset, BUFFER_SIZE, colors);
 
         print16(buffer, bytesRead, colors);
         offset += BUFFER_SIZE;
     }
-    findColors(*root, offset, BUFFER_SIZE, colors);
+    findColors(root, offset, BUFFER_SIZE, colors);
     print16(buffer, bytesRead, colors);
     fclose(fp);
+
+    deleteNode(root);
 
     return 0;
 }

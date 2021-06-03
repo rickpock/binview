@@ -17,8 +17,8 @@ typedef struct Node_t
     int childCnt;
 } Node;
 
-Node *newNode(int color, char *description, Segment *segments, int segmentCnt, Node *children, int childCnt);
+void newNode(int color, char *description, Segment *segments, int segmentCnt, Node *children, int childCnt, Node* node);
 
-void deleteNode(Node* node);
+void deleteNode(Node node);
 
 #endif
