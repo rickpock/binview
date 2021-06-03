@@ -38,22 +38,16 @@ int main(int argc, char **argv)
 
     // Node *magic = newNode(BLUE, "Magic Number", magicSegments, 1, NULL, 0);
 
-    Segment headerSegments[1];
-    headerSegments[0].offset = 0;
-    headerSegments[0].length = 69;
+    Segment headerSegments[] = {{ .offset = 0, .length = 69}};
 
     Node children[2];
     newNode(GREEN, "Local file header", headerSegments, 1, NULL, 0, &children[0]);
 
-    Segment eocdSegments[1];
-    eocdSegments[0].offset = 168;
-    eocdSegments[0].length = 22;
+    Segment eocdSegments[] = {{ .offset = 168, .length = 22}};
 
     newNode(YELLOW, "End of central directory record", eocdSegments, 1, NULL, 0, &children[1]);
 
-    Segment rootSegments[1];
-    rootSegments[0].offset = 0;
-    rootSegments[0].length = 128;
+    Segment rootSegments[] = {{ .offset = 0, .length = 128}};
     Node root;
     newNode(NONE, "Whole file", rootSegments, 1, children, 2, &root);
 
@@ -77,6 +71,7 @@ int main(int argc, char **argv)
     printf("\n");
 
     printHierarchy(root);
+    setColor(NONE);
 
     deleteNode(root);
 
