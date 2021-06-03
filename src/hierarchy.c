@@ -4,8 +4,6 @@
 
 void newNode(int color, char *description, Segment *segments, int segmentCnt, Node *children, int childCnt, Node *node)
 {
-    //node = (Node *)malloc(sizeof(Node));
-    
     node->color = color;
     node->description = malloc(strlen(description) + 1);
     strcpy(node->description, description);

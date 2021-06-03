@@ -1,12 +1,11 @@
 #include <stdio.h>
-//#include <stdlib.h>
 
 #include "../src/hierarchy.h"
 #include "../src/color.h"
 
 unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
-void print16(unsigned char* buffer, int bufferSz, int colors[]);
+void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
 
 void setColor(enum printColor color);
 
@@ -65,11 +64,11 @@ int main(int argc, char **argv)
     {
         findColors(root, offset, BUFFER_SIZE, colors);
 
-        print16(buffer, bytesRead, colors);
+        print16(buffer, bytesRead, offset, colors);
         offset += BUFFER_SIZE;
     }
     findColors(root, offset, BUFFER_SIZE, colors);
-    print16(buffer, bytesRead, colors);
+    print16(buffer, bytesRead, offset, colors);
     fclose(fp);
 
     deleteNode(root);
@@ -123,8 +122,11 @@ inline int read16(FILE *fp, unsigned char* buffer)
     return 16;
 }
 
-inline void print16(unsigned char* buffer, int bufferSz, int colors[])
+inline void print16(unsigned char* buffer, int bufferSz, long offset, int colors[])
 {
+    setColor(NONE);
+    printf("%04lX  ", offset);
+
     for (int counter = 0; counter < 8; counter++)
     {
         if (counter >= bufferSz)
@@ -153,6 +155,7 @@ inline void print16(unsigned char* buffer, int bufferSz, int colors[])
 
     for (int counter = 0; counter < 16 && counter < bufferSz; counter++)
     {
+        setColor(colors[counter]);
         printf("%c", toPrintableChar(buffer[counter]));
     }
 
