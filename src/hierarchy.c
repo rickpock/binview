@@ -14,6 +14,7 @@ void newNode(int color, char *description, Segment *segments, int segmentCnt, No
         memcpy(node->segments, segments, sizeof(Segment) * segmentCnt);
         node->segmentCnt = segmentCnt;
     } else {
+        node->segmentCnt = 0;
         node->segments = NULL;
     }
     
@@ -23,6 +24,7 @@ void newNode(int color, char *description, Segment *segments, int segmentCnt, No
         memcpy(node->children, children, sizeof(Node) * childCnt);
         node->childCnt = childCnt;
     } else {
+        node->childCnt = 0;
         node->children = NULL;
     }
 }
