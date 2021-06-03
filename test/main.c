@@ -11,6 +11,9 @@ void setColor(enum printColor color);
 
 void findColors(Node rootNode, long offset, long length, int *result);
 
+void printHierarchy(const Node rootNode);
+void printHierarchyRecur(const Node node, int depth);
+
 int main(int argc, char **argv)
 {
     if (argc < 2)
@@ -70,6 +73,10 @@ int main(int argc, char **argv)
     findColors(root, offset, BUFFER_SIZE, colors);
     print16(buffer, bytesRead, offset, colors);
     fclose(fp);
+
+    printf("\n");
+
+    printHierarchy(root);
 
     deleteNode(root);
 
@@ -189,5 +196,26 @@ void findColors(Node rootNode, long offset, long length, int *result)
                 }
             }
         }
+    }
+}
+
+void printHierarchy(const Node rootNode)
+{
+    printHierarchyRecur(rootNode, 0);
+}
+
+void printHierarchyRecur(const Node node, int depth)
+{
+    for (int depthIdx = 0; depthIdx < depth; depthIdx++)
+    {
+        printf("  ");
+    }
+
+    setColor(node.color);
+    printf("%s\n", node.description);
+
+    for (int childIdx = 0; childIdx < node.childCnt; childIdx++)
+    {
+        printHierarchyRecur(node.children[childIdx], depth + 1);
     }
 }
