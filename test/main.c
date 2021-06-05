@@ -83,7 +83,7 @@ void setColor(enum printColor color)
     {
         printf("\e[1;3%dm", color & 0x7);
     } else {
-        printf("\e[3%dm", color);
+        printf("\e[0;3%dm", color);
     }
 }
 
