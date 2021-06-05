@@ -33,22 +33,6 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // const int NODE_CHILD_CNT = 4;
-    // Node children[NODE_CHILD_CNT];
-
-    // newNode(GREEN, "Local file header 1", (Segment[]){{ .offset = 0, .length = 69}}, 1, &children[0]);
-    // newNode(LIGHT_BLUE, "File data 1", (Segment[]){{ .offset = 69, .length = 18}}, 1, &children[1]);
-    // newNode(WHITE, "Central file header", (Segment[]){{ .offset = 87, .length = 81}}, 1, &children[2]);
-    // newNode(YELLOW, "End of central directory record", (Segment[]){{ .offset = 168, .length = 22}}, 1, &children[3]);
-
-    // Segment rootSegments[] = {{ .offset = 0, .length = 190}};
-    // Node root;
-    // newNode(NONE, "Zip file", rootSegments, 1, &root);
-    // addChildNode(&root, &children[0]);
-    // addChildNode(&root, &children[1]);
-    // addChildNode(&root, &children[2]);
-    // addChildNode(&root, &children[3]);
-
     Node root = *parse(fp);
 
     const int BUFFER_SIZE = 16;
