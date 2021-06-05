@@ -23,6 +23,7 @@ long peekRelative(FILE *fp, long offset, long n, char *out);
 
 long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut);
 long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *out);
+long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *out);
 
 Node *parse(FILE *fp)
 {
@@ -61,7 +62,11 @@ Node *parse(FILE *fp)
 
         if (memcmp(signatureBuffer, "\x50\x4b\x05\x06", 4) == 0)
         {
-            // TODO: Read end of central directory record
+            Node *endOfCentralDirectoryRecordNode = malloc(sizeof(Node));
+            offset += readEndOfCentralDirectoryRecord(fp, offset, endOfCentralDirectoryRecordNode);
+            addChildNode(output, endOfCentralDirectoryRecordNode);
+
+            continue;
         }
 
         // Section unrecognized
@@ -111,6 +116,21 @@ long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *out)
     fseek(fp, centralDirectoryFileHeaderLen, SEEK_CUR);
 
     return centralDirectoryFileHeaderLen;
+}
+
+long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *out)
+{
+    short commentLen;
+
+    peekRelative(fp, 0x14, 2, (char *)&commentLen);    // TODO: Error checking
+
+    int endOfCentralDirectoryRecordLen = 0x16 + commentLen;
+
+    newNode(YELLOW, "End of Central Directory Record", (Segment[]){{.offset = offset, .length = endOfCentralDirectoryRecordLen}}, 1, out);
+
+    fseek(fp, endOfCentralDirectoryRecordLen, SEEK_CUR);
+
+    return endOfCentralDirectoryRecordLen;
 }
 
 long read(FILE *fp, long n, char *out)
