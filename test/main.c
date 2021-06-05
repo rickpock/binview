@@ -32,24 +32,17 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // Segment magicSegments[1];
-    // magicSegments[0].offset = 0;
-    // magicSegments[0].length = 4;
+    const int NODE_CHILD_CNT = 4;
+    Node children[NODE_CHILD_CNT];
 
-    // Node *magic = newNode(BLUE, "Magic Number", magicSegments, 1, NULL, 0);
+    newNode(GREEN, "Local file header 1", (Segment[]){{ .offset = 0, .length = 69}}, 1, NULL, 0, &children[0]);
+    newNode(BLUE, "File data 1", (Segment[]){{ .offset = 69, .length = 18}}, 1, NULL, 0, &children[1]);
+    newNode(WHITE, "Central file header", (Segment[]){{ .offset = 87, .length = 81}}, 1, NULL, 0, &children[2]);
+    newNode(YELLOW, "End of central directory record", (Segment[]){{ .offset = 168, .length = 22}}, 1, NULL, 0, &children[3]);
 
-    Segment headerSegments[] = {{ .offset = 0, .length = 69}};
-
-    Node children[2];
-    newNode(GREEN, "Local file header", headerSegments, 1, NULL, 0, &children[0]);
-
-    Segment eocdSegments[] = {{ .offset = 168, .length = 22}};
-
-    newNode(YELLOW, "End of central directory record", eocdSegments, 1, NULL, 0, &children[1]);
-
-    Segment rootSegments[] = {{ .offset = 0, .length = 128}};
+    Segment rootSegments[] = {{ .offset = 0, .length = 190}};
     Node root;
-    newNode(NONE, "Whole file", rootSegments, 1, children, 2, &root);
+    newNode(NONE, "Zip file", rootSegments, 1, children, NODE_CHILD_CNT, &root);
 
     const int BUFFER_SIZE = 16;
     unsigned char buffer[BUFFER_SIZE];
