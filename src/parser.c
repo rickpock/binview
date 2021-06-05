@@ -15,6 +15,11 @@ long read(FILE *fp, long n, char *out);
  * Returns actual number of characters read
  */
 long peek(FILE *fp, long n, char *out);
+/*
+ * Peek up to n characters into *out at offset bytes from current cursor position
+ * Returns actual number of characters read
+ */
+long peekRelative(FILE *fp, long offset, long n, char *out);
 
 long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut);
 
@@ -59,17 +64,11 @@ long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut)
     short extraFieldLen;
     long compressedSize;
 
-    fseek(fp, 0x1a, SEEK_CUR);  // TODO: Error checking
-    peek(fp, 2, (char *)&fileNameLen);        // TODO: Error checking
-    fseek(fp, -0x1a, SEEK_CUR); // TODO: Error checking
+    peekRelative(fp, 0x1a, 2, (char *)&fileNameLen);    // TODO: Error checking
 
-    fseek(fp, 0x1c, SEEK_CUR);  // TODO: Error checking
-    peek(fp, 2, (char *)&extraFieldLen);        // TODO: Error checking
-    fseek(fp, -0x1c, SEEK_CUR); // TODO: Error checking
+    peekRelative(fp, 0x1c, 2, (char *)&extraFieldLen);    // TODO: Error checking
 
-    fseek(fp, 0x12, SEEK_CUR);  // TODO: Error checking
-    peek(fp, 4, (char *)&compressedSize);        // TODO: Error checking
-    fseek(fp, -0x12, SEEK_CUR); // TODO: Error checking
+    peekRelative(fp, 0x12, 4, (char *)&compressedSize);    // TODO: Error checking
 
     int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
 
@@ -99,5 +98,13 @@ long peek(FILE *fp, long n, char *out)
 {
     long readCnt = read(fp, n, out);
     fseek(fp, -readCnt, SEEK_CUR);
+    return readCnt;
+}
+
+long peekRelative(FILE *fp, long offset, long n, char *out)
+{
+    fseek(fp, offset, SEEK_CUR);    // TODO: Error checking
+    long readCnt = peek(fp, n, out);
+    fseek(fp, -offset, SEEK_CUR);   // TODO: Error checking
     return readCnt;
 }
