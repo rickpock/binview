@@ -16,7 +16,7 @@ long read(FILE *fp, long n, char *out);
  */
 long peek(FILE *fp, long n, char *out);
 
-long readLocalFileHeader(FILE *fp, long offset, Node *out);
+long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut);
 
 Node *parse(FILE *fp)
 {
@@ -38,8 +38,10 @@ Node *parse(FILE *fp)
         if (memcmp(signatureBuffer, "\x50\x4b\x03\x04", 4) == 0)
         {
             Node *localFileHeaderNode = malloc(sizeof(Node));
-            offset += readLocalFileHeader(fp, offset, localFileHeaderNode);
+            Node *fileDataNode = malloc(sizeof(Node));
+            offset += readLocalFileHeader(fp, offset, localFileHeaderNode, fileDataNode);
             addChildNode(output, localFileHeaderNode);
+            addChildNode(output, fileDataNode);
         }
 
         // Section unrecognized
@@ -49,10 +51,11 @@ Node *parse(FILE *fp)
     return output;
 }
 
-long readLocalFileHeader(FILE *fp, long offset, Node *out)
+long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut)
 {
     short fileNameLen;
     short extraFieldLen;
+    long compressedSize;
 
     fseek(fp, 0x1a, SEEK_CUR);  // TODO: Error checking
     peek(fp, 2, (char *)&fileNameLen);        // TODO: Error checking
@@ -62,11 +65,17 @@ long readLocalFileHeader(FILE *fp, long offset, Node *out)
     peek(fp, 2, (char *)&extraFieldLen);        // TODO: Error checking
     fseek(fp, -0x1c, SEEK_CUR); // TODO: Error checking
 
-    int localFileHeaderLen = 0x3e + fileNameLen + extraFieldLen;
+    fseek(fp, 0x12, SEEK_CUR);  // TODO: Error checking
+    peek(fp, 4, (char *)&compressedSize);        // TODO: Error checking
+    fseek(fp, -0x12, SEEK_CUR); // TODO: Error checking
 
-    newNode(GREEN, "Local File Header", (Segment[]){{.offset = offset, .length = localFileHeaderLen}}, 1, out);
+    int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
 
-    return localFileHeaderLen;
+    newNode(GREEN, "Local File Header", (Segment[]){{.offset = offset, .length = localFileHeaderLen}}, 1, headerOut);
+
+    newNode(LIGHT_BLUE, "File Data", (Segment[]){{.offset = offset + localFileHeaderLen, .length = compressedSize}}, 1, dataOut);
+
+    return localFileHeaderLen + compressedSize;
 }
 
 long read(FILE *fp, long n, char *out)
