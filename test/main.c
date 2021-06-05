@@ -56,6 +56,8 @@ int main(int argc, char **argv)
     int bytesRead = BUFFER_SIZE;
     long offset = 0;
     int colors[BUFFER_SIZE];
+
+    fseek(fp, 0, SEEK_SET);
     
     while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
     {

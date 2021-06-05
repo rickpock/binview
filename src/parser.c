@@ -22,10 +22,8 @@ Node *parse(FILE *fp)
 {
     Node *output = malloc(sizeof(Node));
 
-    // TODO: actual value for length
-    newNode(NONE, "Zip File", (Segment[]){{.offset = 0, .length = 0xB0}}, 1, output);
-    // output->description = malloc(strlen("Zip File") + 1);
-    // strcpy(output->description, "Zip File");
+    // Length will be updated at the end of the function
+    newNode(NONE, "Zip File", (Segment[]){{.offset = 0, .length = 0}}, 1, output);
 
     char signatureBuffer[4];
 
@@ -42,11 +40,15 @@ Node *parse(FILE *fp)
             offset += readLocalFileHeader(fp, offset, localFileHeaderNode, fileDataNode);
             addChildNode(output, localFileHeaderNode);
             addChildNode(output, fileDataNode);
+
+            continue;
         }
 
         // Section unrecognized
         break;
     }
+
+    output->segments[0].length = offset;
 
     return output;
 }
@@ -74,6 +76,8 @@ long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut)
     newNode(GREEN, "Local File Header", (Segment[]){{.offset = offset, .length = localFileHeaderLen}}, 1, headerOut);
 
     newNode(LIGHT_BLUE, "File Data", (Segment[]){{.offset = offset + localFileHeaderLen, .length = compressedSize}}, 1, dataOut);
+
+    fseek(fp, localFileHeaderLen + compressedSize, SEEK_CUR);
 
     return localFileHeaderLen + compressedSize;
 }
