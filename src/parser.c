@@ -22,6 +22,7 @@ long peek(FILE *fp, long n, char *out);
 long peekRelative(FILE *fp, long offset, long n, char *out);
 
 long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut);
+long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *out);
 
 Node *parse(FILE *fp)
 {
@@ -49,6 +50,20 @@ Node *parse(FILE *fp)
             continue;
         }
 
+        if (memcmp(signatureBuffer, "\x50\x4b\x01\x02", 4) == 0)
+        {
+            Node *centralDirectoryFileHeaderNode = malloc(sizeof(Node));
+            offset += readCentralDirectoryFileHeader(fp, offset, centralDirectoryFileHeaderNode);
+            addChildNode(output, centralDirectoryFileHeaderNode);
+
+            continue;
+        }
+
+        if (memcmp(signatureBuffer, "\x50\x4b\x05\x06", 4) == 0)
+        {
+            // TODO: Read end of central directory record
+        }
+
         // Section unrecognized
         break;
     }
@@ -65,9 +80,7 @@ long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut)
     long compressedSize;
 
     peekRelative(fp, 0x1a, 2, (char *)&fileNameLen);    // TODO: Error checking
-
     peekRelative(fp, 0x1c, 2, (char *)&extraFieldLen);    // TODO: Error checking
-
     peekRelative(fp, 0x12, 4, (char *)&compressedSize);    // TODO: Error checking
 
     int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
@@ -79,6 +92,25 @@ long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut)
     fseek(fp, localFileHeaderLen + compressedSize, SEEK_CUR);
 
     return localFileHeaderLen + compressedSize;
+}
+
+long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *out)
+{
+    short fileNameLen;
+    short extraFieldLen;
+    short fileCommentLen;
+
+    peekRelative(fp, 0x1c, 2, (char *)&fileNameLen);    // TODO: Error checking
+    peekRelative(fp, 0x1e, 2, (char *)&extraFieldLen);    // TODO: Error checking
+    peekRelative(fp, 0x20, 2, (char *)&fileCommentLen);    // TODO: Error checking
+
+    int centralDirectoryFileHeaderLen = 0x2e + fileNameLen + extraFieldLen + fileCommentLen;
+
+    newNode(WHITE, "Central Directory File Header", (Segment[]){{.offset = offset, .length = centralDirectoryFileHeaderLen}}, 1, out);
+
+    fseek(fp, centralDirectoryFileHeaderLen, SEEK_CUR);
+
+    return centralDirectoryFileHeaderLen;
 }
 
 long read(FILE *fp, long n, char *out)
