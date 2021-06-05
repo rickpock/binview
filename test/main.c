@@ -6,6 +6,7 @@
 
 unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
+void printHeader();
 void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
 
 void setColor(enum printColor color);
@@ -43,6 +44,7 @@ int main(int argc, char **argv)
 
     fseek(fp, 0, SEEK_SET);
     
+    printHeader();
     while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
     {
         findColors(root, offset, BUFFER_SIZE, colors);
@@ -110,10 +112,30 @@ inline int read16(FILE *fp, unsigned char* buffer)
     return 16;
 }
 
+void printHeader()
+{
+    setColor(NONE);
+    printf("          ");
+
+    for (int colIdx = 0; colIdx < 8; colIdx++)
+    {
+        printf("%02X ", colIdx);
+    }
+
+    printf(" ");
+
+    for (int colIdx = 8; colIdx < 16; colIdx++)
+    {
+        printf("%02X ", colIdx);
+    }
+
+    printf("\n");
+}
+
 inline void print16(unsigned char* buffer, int bufferSz, long offset, int colors[])
 {
     setColor(NONE);
-    printf("%04lX  ", offset);
+    printf("%08lX  ", offset);
 
     for (int counter = 0; counter < 8; counter++)
     {
