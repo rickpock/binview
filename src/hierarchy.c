@@ -2,7 +2,7 @@
 #include <string.h>
 #include "hierarchy.h"
 
-void newNode(int color, char *description, Segment *segments, int segmentCnt, Node *children, int childCnt, Node *node)
+void newNode(int color, char *description, Segment *segments, int segmentCnt, Node *node)
 {
     node->color = color;
     node->description = malloc(strlen(description) + 1);
@@ -18,15 +18,23 @@ void newNode(int color, char *description, Segment *segments, int segmentCnt, No
         node->segments = NULL;
     }
     
-    if (childCnt)
+    node->childCnt = 0;
+    node->firstChild = NULL;
+    node->lastChild = NULL;
+}
+
+void addChildNode(Node *parent, Node *child)
+{
+    parent->childCnt++;
+
+    if (parent->firstChild == NULL)
     {
-        node->children = malloc(sizeof(Node) * childCnt);
-        memcpy(node->children, children, sizeof(Node) * childCnt);
-        node->childCnt = childCnt;
-    } else {
-        node->childCnt = 0;
-        node->children = NULL;
+        parent->firstChild = parent->lastChild = child;
+        return;
     }
+
+    parent->lastChild->nextSibling = child;
+    parent->lastChild = child;
 }
 
 void deleteNode(Node node)
@@ -34,12 +42,13 @@ void deleteNode(Node node)
     free(node.description);
     if (node.segments)
     { free(node.segments); }
-    if (node.children)
+
+    Node* nextChild = node.firstChild;
+    Node* thisChild;
+    while (nextChild)
     {
-        for (int childIdx = 0; childIdx < node.childCnt; childIdx++)
-        {
-            deleteNode(node.children[childIdx]);
-        }
-        free(node.children);
+        thisChild = nextChild;
+        nextChild = nextChild->nextSibling;
+        deleteNode(*thisChild);
     }
 }

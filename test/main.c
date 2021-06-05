@@ -2,6 +2,7 @@
 
 #include "../src/hierarchy.h"
 #include "../src/color.h"
+#include "../src/parser.h"
 
 unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
@@ -35,14 +36,18 @@ int main(int argc, char **argv)
     const int NODE_CHILD_CNT = 4;
     Node children[NODE_CHILD_CNT];
 
-    newNode(GREEN, "Local file header 1", (Segment[]){{ .offset = 0, .length = 69}}, 1, NULL, 0, &children[0]);
-    newNode(BLUE, "File data 1", (Segment[]){{ .offset = 69, .length = 18}}, 1, NULL, 0, &children[1]);
-    newNode(WHITE, "Central file header", (Segment[]){{ .offset = 87, .length = 81}}, 1, NULL, 0, &children[2]);
-    newNode(YELLOW, "End of central directory record", (Segment[]){{ .offset = 168, .length = 22}}, 1, NULL, 0, &children[3]);
+    newNode(GREEN, "Local file header 1", (Segment[]){{ .offset = 0, .length = 69}}, 1, &children[0]);
+    newNode(LIGHT_BLUE, "File data 1", (Segment[]){{ .offset = 69, .length = 18}}, 1, &children[1]);
+    newNode(WHITE, "Central file header", (Segment[]){{ .offset = 87, .length = 81}}, 1, &children[2]);
+    newNode(YELLOW, "End of central directory record", (Segment[]){{ .offset = 168, .length = 22}}, 1, &children[3]);
 
     Segment rootSegments[] = {{ .offset = 0, .length = 190}};
     Node root;
-    newNode(NONE, "Zip file", rootSegments, 1, children, NODE_CHILD_CNT, &root);
+    newNode(NONE, "Zip file", rootSegments, 1, &root);
+    addChildNode(&root, &children[0]);
+    addChildNode(&root, &children[1]);
+    addChildNode(&root, &children[2]);
+    addChildNode(&root, &children[3]);
 
     const int BUFFER_SIZE = 16;
     unsigned char buffer[BUFFER_SIZE];
@@ -164,13 +169,12 @@ void findColors(Node rootNode, long offset, long length, int *result)
         result[resultIdx] = rootNode.color;
     }
 
-    for (int childIdx = 0; childIdx < rootNode.childCnt; childIdx++)
+    Node *childNode = rootNode.firstChild;
+    while(childNode)
     {
-        Node childNode = rootNode.children[childIdx];
-        
-        for (int segmentIdx = 0; segmentIdx < childNode.segmentCnt; segmentIdx++)
+        for (int segmentIdx = 0; segmentIdx < childNode->segmentCnt; segmentIdx++)
         {
-            Segment segment = childNode.segments[segmentIdx];
+            Segment segment = childNode->segments[segmentIdx];
 
             if (segment.offset < offset + length && segment.offset + segment.length > offset)
             {
@@ -180,10 +184,12 @@ void findColors(Node rootNode, long offset, long length, int *result)
 
                 for (long resultIdx = startIdx; resultIdx < endIdx; resultIdx++)
                 {
-                    result[resultIdx] = childNode.color;
+                    result[resultIdx] = childNode->color;
                 }
             }
         }
+
+        childNode = childNode->nextSibling;
     }
 }
 
@@ -202,8 +208,11 @@ void printHierarchyRecur(const Node node, int depth)
     setColor(node.color);
     printf("%s\n", node.description);
 
-    for (int childIdx = 0; childIdx < node.childCnt; childIdx++)
+    Node *childNode = node.firstChild;
+    while(childNode)
     {
-        printHierarchyRecur(node.children[childIdx], depth + 1);
+        printHierarchyRecur(*childNode, depth + 1);
+
+        childNode = childNode->nextSibling;
     }
 }

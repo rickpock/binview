@@ -11,13 +11,19 @@ typedef struct Node_t
 {
     int color;
     char *description;
+
     Segment *segments;
     int segmentCnt;
-    struct Node_t *children;
+
+    struct Node_t *firstChild;
+    struct Node_t *lastChild;
+    struct Node_t *nextSibling;    // Children are a linked list. The first child points to the next.
     int childCnt;
 } Node;
 
-void newNode(int color, char *description, Segment *segments, int segmentCnt, Node *children, int childCnt, Node* node);
+void newNode(int color, char *description, Segment *segments, int segmentCnt, Node* node);
+
+void addChildNode(Node *parent, Node *child);
 
 void deleteNode(Node node);
 
