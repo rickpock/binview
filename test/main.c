@@ -11,10 +11,10 @@ void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
 
 void setColor(enum printColor color);
 
-void findColors(Node rootNode, long offset, long length, int *result);
+void findColors(Node *rootNode, long offset, long length, int *result);
 
-void printHierarchy(const Node rootNode);
-void printHierarchyRecur(const Node node, int depth);
+void printHierarchy(const Node *rootNode);
+void printHierarchyRecur(const Node *node, int depth);
 
 int main(int argc, char **argv)
 {
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    Node root = *parse(fp);
+    Node *root = parse(fp);
 
     const int BUFFER_SIZE = 16;
     unsigned char buffer[BUFFER_SIZE];
@@ -172,14 +172,14 @@ inline void print16(unsigned char* buffer, int bufferSz, long offset, int colors
     printf("\n");
 }
 
-void findColors(Node rootNode, long offset, long length, int *result)
+void findColors(Node *rootNode, long offset, long length, int *result)
 {
     for (long resultIdx = 0; resultIdx < length; resultIdx++)
     {
-        result[resultIdx] = rootNode.color;
+        result[resultIdx] = rootNode->color;
     }
 
-    Node *childNode = rootNode.firstChild;
+    Node *childNode = rootNode->firstChild;
     while(childNode)
     {
         for (int segmentIdx = 0; segmentIdx < childNode->segmentCnt; segmentIdx++)
@@ -203,25 +203,25 @@ void findColors(Node rootNode, long offset, long length, int *result)
     }
 }
 
-void printHierarchy(const Node rootNode)
+void printHierarchy(const Node *rootNode)
 {
     printHierarchyRecur(rootNode, 0);
 }
 
-void printHierarchyRecur(const Node node, int depth)
+void printHierarchyRecur(const Node *node, int depth)
 {
     for (int depthIdx = 0; depthIdx < depth; depthIdx++)
     {
         printf("  ");
     }
 
-    setColor(node.color);
-    printf("%s\n", node.description);
+    setColor(node->color);
+    printf("%s\n", node->description);
 
-    Node *childNode = node.firstChild;
+    Node *childNode = node->firstChild;
     while(childNode)
     {
-        printHierarchyRecur(*childNode, depth + 1);
+        printHierarchyRecur(childNode, depth + 1);
 
         childNode = childNode->nextSibling;
     }

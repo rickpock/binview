@@ -2,8 +2,10 @@
 #include <string.h>
 #include "hierarchy.h"
 
-void newNode(int color, char *description, Segment *segments, int segmentCnt, Node *node)
+Node * newNode(int color, char *description, Segment *segments, int segmentCnt)
 {
+    Node *node = malloc(sizeof(Node));
+
     node->color = color;
     node->description = malloc(strlen(description) + 1);
     strcpy(node->description, description);
@@ -21,6 +23,8 @@ void newNode(int color, char *description, Segment *segments, int segmentCnt, No
     node->childCnt = 0;
     node->firstChild = NULL;
     node->lastChild = NULL;
+
+    return node;
 }
 
 void addChildNode(Node *parent, Node *child)
@@ -37,18 +41,20 @@ void addChildNode(Node *parent, Node *child)
     parent->lastChild = child;
 }
 
-void deleteNode(Node node)
+void deleteNode(Node *node)
 {
-    free(node.description);
-    if (node.segments)
-    { free(node.segments); }
+    free(node->description);
+    if (node->segments)
+    { free(node->segments); }
 
-    Node* nextChild = node.firstChild;
+    Node* nextChild = node->firstChild;
     Node* thisChild;
     while (nextChild)
     {
         thisChild = nextChild;
         nextChild = nextChild->nextSibling;
-        deleteNode(*thisChild);
+        deleteNode(thisChild);
     }
+
+    free(node);
 }

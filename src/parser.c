@@ -21,16 +21,14 @@ long peek(FILE *fp, long n, char *out);
  */
 long peekRelative(FILE *fp, long offset, long n, char *out);
 
-long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut);
-long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *out);
-long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *out);
+long readLocalFileHeader(FILE *fp, long offset, Node *parentNode);
+long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *parentNode);
+long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode);
 
 Node *parse(FILE *fp)
 {
-    Node *output = malloc(sizeof(Node));
-
     // Length will be updated at the end of the function
-    newNode(NONE, "Zip File", (Segment[]){{.offset = 0, .length = 0}}, 1, output);
+    Node *output = newNode(NONE, "Zip File", (Segment[]){{.offset = 0, .length = 0}}, 1);
 
     char signatureBuffer[4];
 
@@ -42,30 +40,19 @@ Node *parse(FILE *fp)
 
         if (memcmp(signatureBuffer, "\x50\x4b\x03\x04", 4) == 0)
         {
-            Node *localFileHeaderNode = malloc(sizeof(Node));
-            Node *fileDataNode = malloc(sizeof(Node));
-            offset += readLocalFileHeader(fp, offset, localFileHeaderNode, fileDataNode);
-            addChildNode(output, localFileHeaderNode);
-            addChildNode(output, fileDataNode);
-
+            offset += readLocalFileHeader(fp, offset, output);
             continue;
         }
 
         if (memcmp(signatureBuffer, "\x50\x4b\x01\x02", 4) == 0)
         {
-            Node *centralDirectoryFileHeaderNode = malloc(sizeof(Node));
-            offset += readCentralDirectoryFileHeader(fp, offset, centralDirectoryFileHeaderNode);
-            addChildNode(output, centralDirectoryFileHeaderNode);
-
+            offset += readCentralDirectoryFileHeader(fp, offset, output);
             continue;
         }
 
         if (memcmp(signatureBuffer, "\x50\x4b\x05\x06", 4) == 0)
         {
-            Node *endOfCentralDirectoryRecordNode = malloc(sizeof(Node));
-            offset += readEndOfCentralDirectoryRecord(fp, offset, endOfCentralDirectoryRecordNode);
-            addChildNode(output, endOfCentralDirectoryRecordNode);
-
+            offset += readEndOfCentralDirectoryRecord(fp, offset, output);
             continue;
         }
 
@@ -78,7 +65,7 @@ Node *parse(FILE *fp)
     return output;
 }
 
-long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut)
+long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
 {
     short fileNameLen;
     short extraFieldLen;
@@ -90,16 +77,17 @@ long readLocalFileHeader(FILE *fp, long offset, Node *headerOut, Node *dataOut)
 
     int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
 
-    newNode(GREEN, "Local File Header", (Segment[]){{.offset = offset, .length = localFileHeaderLen}}, 1, headerOut);
-
-    newNode(LIGHT_BLUE, "File Data", (Segment[]){{.offset = offset + localFileHeaderLen, .length = compressedSize}}, 1, dataOut);
+    Node *headerNode = newNode(GREEN, "Local File Header", (Segment[]){{.offset = offset, .length = localFileHeaderLen}}, 1);
+    addChildNode(parentNode, headerNode);
+    Node *dataNode = newNode(LIGHT_BLUE, "File Data", (Segment[]){{.offset = offset + localFileHeaderLen, .length = compressedSize}}, 1);
+    addChildNode(parentNode, dataNode);
 
     fseek(fp, localFileHeaderLen + compressedSize, SEEK_CUR);
 
     return localFileHeaderLen + compressedSize;
 }
 
-long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *out)
+long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *parentNode)
 {
     short fileNameLen;
     short extraFieldLen;
@@ -111,14 +99,15 @@ long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *out)
 
     int centralDirectoryFileHeaderLen = 0x2e + fileNameLen + extraFieldLen + fileCommentLen;
 
-    newNode(WHITE, "Central Directory File Header", (Segment[]){{.offset = offset, .length = centralDirectoryFileHeaderLen}}, 1, out);
+    Node *headerNode = newNode(WHITE, "Central Directory File Header", (Segment[]){{.offset = offset, .length = centralDirectoryFileHeaderLen}}, 1);
+    addChildNode(parentNode, headerNode);
 
     fseek(fp, centralDirectoryFileHeaderLen, SEEK_CUR);
 
     return centralDirectoryFileHeaderLen;
 }
 
-long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *out)
+long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode)
 {
     short commentLen;
 
@@ -126,7 +115,8 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *out)
 
     int endOfCentralDirectoryRecordLen = 0x16 + commentLen;
 
-    newNode(YELLOW, "End of Central Directory Record", (Segment[]){{.offset = offset, .length = endOfCentralDirectoryRecordLen}}, 1, out);
+    Node *eocdrNode = newNode(YELLOW, "End of Central Directory Record", (Segment[]){{.offset = offset, .length = endOfCentralDirectoryRecordLen}}, 1);
+    addChildNode(parentNode, eocdrNode);
 
     fseek(fp, endOfCentralDirectoryRecordLen, SEEK_CUR);
 

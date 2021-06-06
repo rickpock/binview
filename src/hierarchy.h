@@ -21,10 +21,10 @@ typedef struct Node_t
     int childCnt;
 } Node;
 
-void newNode(int color, char *description, Segment *segments, int segmentCnt, Node* node);
+Node * newNode(int color, char *description, Segment *segments, int segmentCnt);
 
 void addChildNode(Node *parent, Node *child);
 
-void deleteNode(Node node);
+void deleteNode(Node *node);
 
 #endif
