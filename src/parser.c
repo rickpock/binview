@@ -82,6 +82,33 @@ long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
     Node *dataNode = newNode(LIGHT_BLUE, "File Data", (Segment[]){{.offset = offset + localFileHeaderLen, .length = compressedSize}}, 1);
     addChildNode(parentNode, dataNode);
 
+    addChildNode(headerNode,
+        newContigNode(GREEN, "Signature", offset + 0x0, 0x4));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_GREEN, "Version", offset + 0x4, 0x2));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_CYAN, "Flags", offset + 0x6, 0x2));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_PURPLE, "Compression method", offset + 0x8, 0x2));
+    addChildNode(headerNode,
+        newContigNode(CYAN, "File modification time", offset + 0xA, 0x2));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_GREEN, "File modification date", offset + 0xC, 0x2));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_CYAN, "CRC-32 checksum", offset + 0xE, 0x4));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_PURPLE, "Compressed size", offset + 0x12, 0x4));
+    addChildNode(headerNode,
+        newContigNode(CYAN, "Uncompressed size", offset + 0x16, 0x4));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_GREEN, "File name length", offset + 0x1A, 0x2));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_CYAN, "Extra field length", offset + 0x1C, 0x2));
+    addChildNode(headerNode,
+        newContigNode(LIGHT_PURPLE, "File name", offset + 0x1E, fileNameLen));
+    addChildNode(headerNode,
+        newContigNode(CYAN, "Extra field", offset + 0x1E + fileNameLen, extraFieldLen));
+
     fseek(fp, localFileHeaderLen + compressedSize, SEEK_CUR);
 
     return localFileHeaderLen + compressedSize;
