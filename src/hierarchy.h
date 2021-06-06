@@ -21,6 +21,7 @@ typedef struct Node_t
     int childCnt;
 } Node;
 
+Node * newContigNode(int color, char *description, long offset, long length);
 Node * newNode(int color, char *description, Segment *segments, int segmentCnt);
 
 void addChildNode(Node *parent, Node *child);
