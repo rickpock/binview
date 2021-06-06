@@ -188,14 +188,11 @@ void findColors(Node *rootNode, long offset, long length, int *result)
 
             if (segment.offset < offset + length && segment.offset + segment.length > offset)
             {
-                // TODO: Recur?
+                // TODO: Clean this up so it's actually understandable
                 long startIdx = (segment.offset < offset) ? 0 : segment.offset - offset;
                 long endIdx = (segment.offset + segment.length > offset + length) ? length : segment.offset + segment.length - offset;
 
-                for (long resultIdx = startIdx; resultIdx < endIdx; resultIdx++)
-                {
-                    result[resultIdx] = childNode->color;
-                }
+                findColors(childNode, startIdx + offset, endIdx - startIdx, &result[startIdx]);
             }
         }
 
