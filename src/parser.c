@@ -20,6 +20,7 @@ long peek(FILE *fp, long n, char *out);
 long peekRelative(FILE *fp, long offset, long n, char *out);
 
 long readLocalFileHeader(FILE *fp, long offset, Node *parentNode);
+long readCentralDirectory(FILE *fp, long offset, Node *parentNode);
 long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *parentNode);
 long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode);
 
@@ -44,13 +45,13 @@ Node *parse(FILE *fp)
 
         if (memcmp(signatureBuffer, "\x50\x4b\x01\x02", 4) == 0)
         {
-            offset += readCentralDirectoryFileHeader(fp, offset, output);
+            offset += readCentralDirectory(fp, offset, output);
             continue;
         }
 
         if (memcmp(signatureBuffer, "\x50\x4b\x05\x06", 4) == 0)
         {
-            offset += readEndOfCentralDirectoryRecord(fp, offset, output);
+            offset += readCentralDirectory(fp, offset, output);
             continue;
         }
 
@@ -61,6 +62,39 @@ Node *parse(FILE *fp)
     output->segments[0].length = offset;
 
     return output;
+}
+
+long readCentralDirectory(FILE *fp, long offset, Node *parentNode)
+{
+    Node *centralDirectory = newContigNode("Central Directory", offset, 0);
+
+    char signatureBuffer[4];
+
+    while (! feof(fp))
+    {
+        peek(fp, 4, signatureBuffer);
+
+        if (memcmp(signatureBuffer, "\x50\x4b\x01\x02", 4) == 0)
+        {
+            offset += readCentralDirectoryFileHeader(fp, offset, centralDirectory);
+            continue;
+        }
+
+        if (memcmp(signatureBuffer, "\x50\x4b\x05\x06", 4) == 0)
+        {
+            offset += readEndOfCentralDirectoryRecord(fp, offset, centralDirectory);
+            continue;
+        }
+
+        // Section unrecognized
+        break;
+    }
+
+    addChildNode(parentNode, centralDirectory);
+
+    centralDirectory->segments[0].length = offset - centralDirectory->segments[0].offset;
+
+    return offset;
 }
 
 long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
