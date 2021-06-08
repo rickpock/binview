@@ -267,9 +267,13 @@ void findColorsRecur(const Node *rootNode, const Node *selected, long offset, lo
 {
     for (long resultIdx = 0; resultIdx < length; resultIdx++)
     {
-        if (rootNode == selected)
+        if (rootNode == selected->parent)
         {
             result[resultIdx] = LIGHT_BLUE;
+        }
+        if (rootNode == selected)
+        {
+            result[resultIdx] = WHITE;
         }
     }
 
@@ -306,9 +310,12 @@ void printHierarchyRecur(const Node *node, const Node *selected, int depth)
         printf("  ");
     }
 
-    if (node == selected)
+    if (node == selected->parent)
     {
         setColor(LIGHT_BLUE);
+    } else if (node == selected)
+    {
+        setColor(WHITE);
     } else {
         setColor(NONE);
     }
