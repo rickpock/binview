@@ -161,6 +161,47 @@ long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *parentNode)
     Node *headerNode = newNode("Central Directory File Header", (Segment[]){{.offset = offset, .length = centralDirectoryFileHeaderLen}}, 1);
     addChildNode(parentNode, headerNode);
 
+    addChildNode(headerNode,
+        newContigNode("Signature", offset + 0x0, 0x4));
+    addChildNode(headerNode,
+        newContigNode("Version", offset + 0x4, 0x2));
+    addChildNode(headerNode,
+        newContigNode("Version needed", offset + 0x6, 0x2));
+    addChildNode(headerNode,
+        newContigNode("Flags", offset + 0x8, 0x2));
+    addChildNode(headerNode,
+        newContigNode("Compression method", offset + 0xA, 0x2));
+    addChildNode(headerNode,
+        newContigNode("File modification time", offset + 0xC, 0x2));
+    addChildNode(headerNode,
+        newContigNode("File modification date", offset + 0xE, 0x2));
+    addChildNode(headerNode,
+        newContigNode("CRC-32 checksum", offset + 0x10, 0x4));
+    addChildNode(headerNode,
+        newContigNode("Compressed size", offset + 0x14, 0x4));
+    addChildNode(headerNode,
+        newContigNode("Uncompressed size", offset + 0x18, 0x4));
+    addChildNode(headerNode,
+        newContigNode("File name length", offset + 0x1C, 0x2));
+    addChildNode(headerNode,
+        newContigNode("Extra field length", offset + 0x1E, 0x2));
+    addChildNode(headerNode,
+        newContigNode("File comment length", offset + 0x20, 0x2));
+    addChildNode(headerNode,
+        newContigNode("Disk # start", offset + 0x22, 0x2));
+    addChildNode(headerNode,
+        newContigNode("Internal attributes", offset + 0x24, 0x2));
+    addChildNode(headerNode,
+        newContigNode("External attributes", offset + 0x26, 0x4));
+    addChildNode(headerNode,
+        newContigNode("Offset of local header", offset + 0x2A, 0x4));
+    addChildNode(headerNode,
+        newContigNode("File name", offset + 0x2E, fileNameLen));
+    addChildNode(headerNode,
+        newContigNode("Extra field", offset + 0x2E + fileNameLen, extraFieldLen));
+    addChildNode(headerNode,
+        newContigNode("File comment", offset + 0x2E + fileNameLen + extraFieldLen, fileCommentLen));
+
     fseek(fp, centralDirectoryFileHeaderLen, SEEK_CUR);
 
     return centralDirectoryFileHeaderLen;
