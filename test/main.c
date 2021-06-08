@@ -18,7 +18,8 @@ void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
 
 void setColor(enum printColor color);
 
-void findColors(const Node *rootNode, long offset, long length, int *result);
+void findColors(const Node *rootNode, const Node *selected, long offset, long length, int *result);
+void findColorsRecur(const Node *rootNode, const Node *selected, long offset, long length, int *result);
 
 void printHierarchy(const Node *rootNode, const Node *selected);
 void printHierarchyRecur(const Node *node, const Node *selected, int depth);
@@ -106,12 +107,12 @@ void draw(FILE *fp, const Node *root, const Node *selected)
     printHeader();
     while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
     {
-        findColors(root, offset, BUFFER_SIZE, colors);
+        findColors(root, selected, offset, BUFFER_SIZE, colors);
 
         print16(buffer, bytesRead, offset, colors);
         offset += BUFFER_SIZE;
     }
-    findColors(root, offset, BUFFER_SIZE, colors);
+    findColors(root, selected, offset, BUFFER_SIZE, colors);
     print16(buffer, bytesRead, offset, colors);
 
     printf("\n");
@@ -248,11 +249,24 @@ inline void print16(unsigned char* buffer, int bufferSz, long offset, int colors
     printf("\n");
 }
 
-void findColors(const Node *rootNode, long offset, long length, int *result)
+void findColors(const Node *rootNode, const Node *selected, long offset, long length, int *result)
 {
     for (long resultIdx = 0; resultIdx < length; resultIdx++)
     {
-        result[resultIdx] = rootNode->color;
+        result[resultIdx] = NONE;
+    }
+
+    findColorsRecur(rootNode, selected, offset, length, result);
+}
+
+void findColorsRecur(const Node *rootNode, const Node *selected, long offset, long length, int *result)
+{
+    for (long resultIdx = 0; resultIdx < length; resultIdx++)
+    {
+        if (rootNode == selected)
+        {
+            result[resultIdx] = LIGHT_BLUE;
+        }
     }
 
     Node *childNode = rootNode->firstChild;
@@ -268,7 +282,7 @@ void findColors(const Node *rootNode, long offset, long length, int *result)
                 long startIdx = (segment.offset < offset) ? 0 : segment.offset - offset;
                 long endIdx = (segment.offset + segment.length > offset + length) ? length : segment.offset + segment.length - offset;
 
-                findColors(childNode, startIdx + offset, endIdx - startIdx, &result[startIdx]);
+                findColorsRecur(childNode, selected, startIdx + offset, endIdx - startIdx, &result[startIdx]);
             }
         }
 
