@@ -1,8 +1,15 @@
 #include <stdio.h>
 
+#include <termios.h>
+
+
 #include "../src/hierarchy.h"
 #include "../src/color.h"
 #include "../src/parser.h"
+
+void draw(FILE *fp, const Node *root, const Node *selected);
+
+int expandNode(const Node *root, const Node *selected);
 
 unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
@@ -11,13 +18,20 @@ void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
 
 void setColor(enum printColor color);
 
-void findColors(Node *rootNode, long offset, long length, int *result);
+void findColors(const Node *rootNode, long offset, long length, int *result);
 
-void printHierarchy(const Node *rootNode);
-void printHierarchyRecur(const Node *node, int depth);
+void printHierarchy(const Node *rootNode, const Node *selected);
+void printHierarchyRecur(const Node *node, const Node *selected, int depth);
 
 int main(int argc, char **argv)
 {
+    struct termios info;
+    tcgetattr(0, &info);          /* get current terminal attirbutes; 0 is the file descriptor for stdin */
+    info.c_lflag &= ~ICANON;      /* disable canonical mode */
+    info.c_cc[VMIN] = 1;          /* wait until at least one keystroke available */
+    info.c_cc[VTIME] = 0;         /* no timeout */
+    tcsetattr(0, TCSANOW, &info); /* set immediately */
+
     if (argc < 2)
     {
         perror("Missing an argument.");
@@ -36,14 +50,59 @@ int main(int argc, char **argv)
 
     Node *root = parse(fp);
 
+    Node *selected = root;
+
+    while(1)
+    {
+        draw(fp, root, selected);
+
+        char nextChar = getchar();
+        switch (nextChar)
+        {
+            case 'q':
+                fclose(fp);
+                deleteNode(root);
+                return 0;
+
+            case '\033':
+                getchar();
+                nextChar = getchar();
+
+                switch (nextChar)
+                {
+                    case 'A':   // Up
+                        break;
+
+                    case 'B':   // Down
+                        if (selected->nextSibling)
+                        { selected = selected->nextSibling; }
+                        break;
+                        
+                    case 'C':   // Right
+                        if (selected->firstChild)
+                        { selected = selected->firstChild; }
+                        break;
+                        
+                    case 'D':   // Left
+                        break;
+                        
+                }
+        }
+    }
+}
+
+void draw(FILE *fp, const Node *root, const Node *selected)
+{
+    printf("\033[2J");
+
+    fseek(fp, 0, SEEK_SET);
+
     const int BUFFER_SIZE = 16;
     unsigned char buffer[BUFFER_SIZE];
     int bytesRead = BUFFER_SIZE;
     long offset = 0;
     int colors[BUFFER_SIZE];
 
-    fseek(fp, 0, SEEK_SET);
-    
     printHeader();
     while ((bytesRead = read16(fp, buffer)) == BUFFER_SIZE)
     {
@@ -54,14 +113,31 @@ int main(int argc, char **argv)
     }
     findColors(root, offset, BUFFER_SIZE, colors);
     print16(buffer, bytesRead, offset, colors);
-    fclose(fp);
 
     printf("\n");
 
-    printHierarchy(root);
+    printHierarchy(root, selected);
     setColor(NONE);
+}
 
-    deleteNode(root);
+// Expand root if it is an ancestor of selected
+int expandNode(const Node *root, const Node *selected)
+{
+    // TODO: Redesign; super inefficient right now
+    Node *child = root->firstChild;
+    while(child)
+    {
+        if (child == selected)
+        {
+            return 1;
+        }
+        if (expandNode(child, selected))
+        {
+            return 1;
+        }
+
+        child = child->nextSibling;
+    }
 
     return 0;
 }
@@ -172,7 +248,7 @@ inline void print16(unsigned char* buffer, int bufferSz, long offset, int colors
     printf("\n");
 }
 
-void findColors(Node *rootNode, long offset, long length, int *result)
+void findColors(const Node *rootNode, long offset, long length, int *result)
 {
     for (long resultIdx = 0; resultIdx < length; resultIdx++)
     {
@@ -200,12 +276,12 @@ void findColors(Node *rootNode, long offset, long length, int *result)
     }
 }
 
-void printHierarchy(const Node *rootNode)
+void printHierarchy(const Node *rootNode, const Node *selected)
 {
-    printHierarchyRecur(rootNode, 0);
+    printHierarchyRecur(rootNode, selected, 0);
 }
 
-void printHierarchyRecur(const Node *node, int depth)
+void printHierarchyRecur(const Node *node, const Node *selected, int depth)
 {
     for (int depthIdx = 0; depthIdx < depth; depthIdx++)
     {
@@ -215,11 +291,14 @@ void printHierarchyRecur(const Node *node, int depth)
     setColor(node->color);
     printf("%s\n", node->description);
 
-    Node *childNode = node->firstChild;
-    while(childNode)
+    if (expandNode(node, selected))
     {
-        printHierarchyRecur(childNode, depth + 1);
+        Node *childNode = node->firstChild;
+        while(childNode)
+        {
+            printHierarchyRecur(childNode, selected, depth + 1);
 
-        childNode = childNode->nextSibling;
+            childNode = childNode->nextSibling;
+        }
     }
 }
