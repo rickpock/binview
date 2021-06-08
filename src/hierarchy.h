@@ -9,7 +9,6 @@ typedef struct
 
 typedef struct Node_t
 {
-    int color;
     char *description;
 
     Segment *segments;
@@ -24,8 +23,8 @@ typedef struct Node_t
     struct Node_t *prevSibling;
 } Node;
 
-Node * newContigNode(int color, char *description, long offset, long length);
-Node * newNode(int color, char *description, Segment *segments, int segmentCnt);
+Node * newContigNode(char *description, long offset, long length);
+Node * newNode(char *description, Segment *segments, int segmentCnt);
 
 void addChildNode(Node *parent, Node *child);
 

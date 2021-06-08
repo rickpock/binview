@@ -2,16 +2,15 @@
 #include <string.h>
 #include "hierarchy.h"
 
-Node * newContigNode(int color, char *description, long offset, long length)
+Node * newContigNode(char *description, long offset, long length)
 {
-    return newNode(color, description, (Segment[]){{.offset = offset, .length = length}}, 1);
+    return newNode(description, (Segment[]){{.offset = offset, .length = length}}, 1);
 }
 
-Node * newNode(int color, char *description, Segment *segments, int segmentCnt)
+Node * newNode(char *description, Segment *segments, int segmentCnt)
 {
     Node *node = malloc(sizeof(Node));
 
-    node->color = color;
     node->description = malloc(strlen(description) + 1);
     strcpy(node->description, description);
 

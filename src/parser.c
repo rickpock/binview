@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "color.h"
-
 /*
  * Read up to n characters into *out, or until EOF
  * Returns actual number of characters read
@@ -28,7 +26,7 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode);
 Node *parse(FILE *fp)
 {
     // Length will be updated at the end of the function
-    Node *output = newNode(NONE, "Zip File", (Segment[]){{.offset = 0, .length = 0}}, 1);
+    Node *output = newNode("Zip File", (Segment[]){{.offset = 0, .length = 0}}, 1);
 
     char signatureBuffer[4];
 
@@ -77,37 +75,37 @@ long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
 
     int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
 
-    Node *headerNode = newNode(GREEN, "Local File Header", (Segment[]){{.offset = offset, .length = localFileHeaderLen}}, 1);
+    Node *headerNode = newNode("Local File Header", (Segment[]){{.offset = offset, .length = localFileHeaderLen}}, 1);
     addChildNode(parentNode, headerNode);
-    Node *dataNode = newNode(LIGHT_BLUE, "File Data", (Segment[]){{.offset = offset + localFileHeaderLen, .length = compressedSize}}, 1);
+    Node *dataNode = newNode("File Data", (Segment[]){{.offset = offset + localFileHeaderLen, .length = compressedSize}}, 1);
     addChildNode(parentNode, dataNode);
 
     addChildNode(headerNode,
-        newContigNode(GREEN, "Signature", offset + 0x0, 0x4));
+        newContigNode("Signature", offset + 0x0, 0x4));
     addChildNode(headerNode,
-        newContigNode(LIGHT_GREEN, "Version", offset + 0x4, 0x2));
+        newContigNode("Version", offset + 0x4, 0x2));
     addChildNode(headerNode,
-        newContigNode(LIGHT_CYAN, "Flags", offset + 0x6, 0x2));
+        newContigNode("Flags", offset + 0x6, 0x2));
     addChildNode(headerNode,
-        newContigNode(LIGHT_PURPLE, "Compression method", offset + 0x8, 0x2));
+        newContigNode("Compression method", offset + 0x8, 0x2));
     addChildNode(headerNode,
-        newContigNode(CYAN, "File modification time", offset + 0xA, 0x2));
+        newContigNode("File modification time", offset + 0xA, 0x2));
     addChildNode(headerNode,
-        newContigNode(LIGHT_GREEN, "File modification date", offset + 0xC, 0x2));
+        newContigNode("File modification date", offset + 0xC, 0x2));
     addChildNode(headerNode,
-        newContigNode(LIGHT_CYAN, "CRC-32 checksum", offset + 0xE, 0x4));
+        newContigNode("CRC-32 checksum", offset + 0xE, 0x4));
     addChildNode(headerNode,
-        newContigNode(LIGHT_PURPLE, "Compressed size", offset + 0x12, 0x4));
+        newContigNode("Compressed size", offset + 0x12, 0x4));
     addChildNode(headerNode,
-        newContigNode(CYAN, "Uncompressed size", offset + 0x16, 0x4));
+        newContigNode("Uncompressed size", offset + 0x16, 0x4));
     addChildNode(headerNode,
-        newContigNode(LIGHT_GREEN, "File name length", offset + 0x1A, 0x2));
+        newContigNode("File name length", offset + 0x1A, 0x2));
     addChildNode(headerNode,
-        newContigNode(LIGHT_CYAN, "Extra field length", offset + 0x1C, 0x2));
+        newContigNode("Extra field length", offset + 0x1C, 0x2));
     addChildNode(headerNode,
-        newContigNode(LIGHT_PURPLE, "File name", offset + 0x1E, fileNameLen));
+        newContigNode("File name", offset + 0x1E, fileNameLen));
     addChildNode(headerNode,
-        newContigNode(CYAN, "Extra field", offset + 0x1E + fileNameLen, extraFieldLen));
+        newContigNode("Extra field", offset + 0x1E + fileNameLen, extraFieldLen));
 
     fseek(fp, localFileHeaderLen + compressedSize, SEEK_CUR);
 
@@ -126,7 +124,7 @@ long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *parentNode)
 
     int centralDirectoryFileHeaderLen = 0x2e + fileNameLen + extraFieldLen + fileCommentLen;
 
-    Node *headerNode = newNode(WHITE, "Central Directory File Header", (Segment[]){{.offset = offset, .length = centralDirectoryFileHeaderLen}}, 1);
+    Node *headerNode = newNode("Central Directory File Header", (Segment[]){{.offset = offset, .length = centralDirectoryFileHeaderLen}}, 1);
     addChildNode(parentNode, headerNode);
 
     fseek(fp, centralDirectoryFileHeaderLen, SEEK_CUR);
@@ -142,7 +140,7 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode)
 
     int endOfCentralDirectoryRecordLen = 0x16 + commentLen;
 
-    Node *eocdrNode = newNode(YELLOW, "End of Central Directory Record", (Segment[]){{.offset = offset, .length = endOfCentralDirectoryRecordLen}}, 1);
+    Node *eocdrNode = newNode("End of Central Directory Record", (Segment[]){{.offset = offset, .length = endOfCentralDirectoryRecordLen}}, 1);
     addChildNode(parentNode, eocdrNode);
 
     fseek(fp, endOfCentralDirectoryRecordLen, SEEK_CUR);

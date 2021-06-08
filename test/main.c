@@ -2,9 +2,9 @@
 
 #include <termios.h>
 
+#include "color.h"
 
 #include "../src/hierarchy.h"
-#include "../src/color.h"
 #include "../src/parser.h"
 
 void draw(FILE *fp, const Node *root, const Node *selected);
