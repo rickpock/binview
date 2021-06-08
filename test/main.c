@@ -72,6 +72,8 @@ int main(int argc, char **argv)
                 switch (nextChar)
                 {
                     case 'A':   // Up
+                        if (selected->prevSibling)
+                        { selected = selected->prevSibling; }
                         break;
 
                     case 'B':   // Down
@@ -85,6 +87,8 @@ int main(int argc, char **argv)
                         break;
                         
                     case 'D':   // Left
+                        if (selected->parent)
+                        { selected = selected->parent; }
                         break;
                         
                 }

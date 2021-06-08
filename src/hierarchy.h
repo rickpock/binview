@@ -17,8 +17,11 @@ typedef struct Node_t
 
     struct Node_t *firstChild;
     struct Node_t *lastChild;
+
+    struct Node_t *parent;
+
     struct Node_t *nextSibling;    // Children are a linked list. The first child points to the next.
-    int childCnt;
+    struct Node_t *prevSibling;
 } Node;
 
 Node * newContigNode(int color, char *description, long offset, long length);

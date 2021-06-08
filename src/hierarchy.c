@@ -25,16 +25,20 @@ Node * newNode(int color, char *description, Segment *segments, int segmentCnt)
         node->segments = NULL;
     }
     
-    node->childCnt = 0;
     node->firstChild = NULL;
     node->lastChild = NULL;
+
+    node->parent = NULL;
+
+    node->nextSibling = NULL;
+    node->prevSibling = NULL;
 
     return node;
 }
 
 void addChildNode(Node *parent, Node *child)
 {
-    parent->childCnt++;
+    child->parent = parent;
 
     if (parent->firstChild == NULL)
     {
@@ -43,6 +47,7 @@ void addChildNode(Node *parent, Node *child)
     }
 
     parent->lastChild->nextSibling = child;
+    child->prevSibling = parent->lastChild;
     parent->lastChild = child;
 }
 
