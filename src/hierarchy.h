@@ -23,8 +23,8 @@ typedef struct Node_t
     struct Node_t *prevSibling;
 } Node;
 
-Node * newContigNode(char *description, long offset, long length);
-Node * newNode(char *description, Segment *segments, int segmentCnt);
+Node * newNode(char *description, long offset, long length);
+Node * newNodeEx(char *description, Segment *segments, int segmentCnt);
 
 void addChildNode(Node *parent, Node *child);
 
