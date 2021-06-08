@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 
 void draw(FILE *fp, const Node *root, const Node *selected)
 {
-    printf("\033[2J");
+    printf("\033[2J\n");
 
     fseek(fp, 0, SEEK_SET);
 
@@ -302,7 +302,12 @@ void printHierarchyRecur(const Node *node, const Node *selected, int depth)
         printf("  ");
     }
 
-    setColor(node->color);
+    if (node == selected)
+    {
+        setColor(LIGHT_BLUE);
+    } else {
+        setColor(NONE);
+    }
     printf("%s\n", node->description);
 
     if (expandNode(node, selected))
