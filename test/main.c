@@ -424,44 +424,69 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
             }
         } else if ((node->displayType & DT_INT) == DT_INT)
         {
-            if ((isLittleEndian()) == ((node->displayType & DT_INT_OPT_BIGENDIAN) != DT_INT_OPT_BIGENDIAN))
+            // Read memory from least-significant byte to most-significant byte
+            // Write into the long from least-significant byte to most-significant byte
+
+            unsigned long value = 0;
+            if ((node->displayType & DT_INT_OPT_BIGENDIAN) != DT_INT_OPT_BIGENDIAN) // Memory is little endian
             {
-                // Both system and the node's value are little endian OR both system and the node's value are big endian
-                unsigned long value = 0;
-
-                // I believe this code works for both big endian
-                // // TODO: Rewrite to support multiple segments
-                // for (int charIdx = node->segments[0].length - 1, longIdx = sizeof(unsigned long) - 1; charIdx >= 0 && longIdx >= 0; charIdx--, longIdx--)
-                // {
-                //     // printf("\ncharIdx %i (%i)\nlongIdx %i\n", charIdx, nodeValue[charIdx], longIdx);
-                //     ((char *)&value)[longIdx] = nodeValue[charIdx];
-                // }
-
-                // I believe this code works for both little endian only
-                // // TODO: Rewrite to support multiple segments
-                for (int charIdx = 0, longIdx = 0; charIdx < node->segments[0].length && longIdx < sizeof(unsigned long); charIdx++, longIdx++)
+                if (isLittleEndian())   // System is little endian
                 {
-                    ((char *)&value)[longIdx] = nodeValue[charIdx];
+                    // Read memory from left to right
+                    // Write into the long from left to right
+                    for (int charIdx = 0, longIdx = 0; charIdx < node->segments[0].length && longIdx < sizeof(unsigned long); charIdx++, longIdx++)
+                    {
+                        ((char *)&value)[longIdx] = nodeValue[charIdx];
+                    }
+                } else {    // System is big endian
+                    // Read memory from left to right
+                    // Write into the long from right to left
+                    for (int charIdx = 0, longIdx = sizeof(unsigned long) - 1; charIdx < node->segments[0].length && longIdx >= 0; charIdx++, longIdx--)
+                    {
+                        ((char *)&value)[longIdx] = nodeValue[charIdx];
+                    }
                 }
 
                 printf("%ld", value);
 
-                // TODO: Display hex in big endian, even if the memory is in little endian
                 if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
                 {
                     printf(" (0x");
-                    int charIdx = 0;
-                    for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
+                    for (int charIdx = node->segments[0].length - 1; charIdx >= 0; charIdx--)
                     {
-                        for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
-                        {
-                            printf("%02X", nodeValue[charIdx]);
-                        }
+                        printf("%02X", nodeValue[charIdx]);
                     }
                     printf(")");
                 }
-            } else {
-                // TODO
+            } else {    // Memory is big endian
+                if (isLittleEndian())   // System is little endian
+                {
+                    // Read memory from right to left
+                    // Write into the long from left to right
+                    for (int charIdx = node->segments[0].length - 1, longIdx = 0; charIdx >= 0 && longIdx < sizeof(unsigned long); charIdx--, longIdx++)
+                    {
+                        ((char *)&value)[longIdx] = nodeValue[charIdx];
+                    }
+                } else {    // System is big endian
+                    // Read memory from right to left
+                    // Write into the long from right to left
+                    for (int charIdx = node->segments[0].length - 1, longIdx = sizeof(unsigned long) - 1; charIdx >= 0 && longIdx >= 0; charIdx--, longIdx--)
+                    {
+                        ((char *)&value)[longIdx] = nodeValue[charIdx];
+                    }
+                }
+
+                printf("%ld", value);
+
+                if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
+                {
+                    printf(" (0x");
+                    for (int charIdx = 0; charIdx < node->segments[0].length; charIdx++)
+                    {
+                        printf("%02X", nodeValue[charIdx]);
+                    }
+                    printf(")");
+                }
             }
         }
 
