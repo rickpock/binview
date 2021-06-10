@@ -115,7 +115,7 @@ long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
     addChildNode(parentNode, dataNode);
 
     addChildNode(headerNode,
-        newNode("Signature", offset + 0x0, 0x4));
+        newNodeEx("Signature", (Segment[]){{.offset = offset + 0x0, .length = 0x4}}, 1, DT_HEX));
     addChildNode(headerNode,
         newNode("Version", offset + 0x4, 0x2));
     addChildNode(headerNode,
@@ -137,7 +137,7 @@ long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
     addChildNode(headerNode,
         newNode("Extra field length", offset + 0x1C, 0x2));
     addChildNode(headerNode,
-        newNode("File name", offset + 0x1E, fileNameLen));
+        newNodeEx("File name", (Segment[]){{.offset = offset + 0x1E, .length = fileNameLen}}, 1, DT_ASCII));
     addChildNode(headerNode,
         newNode("Extra field", offset + 0x1E + fileNameLen, extraFieldLen));
 

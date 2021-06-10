@@ -390,10 +390,40 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
         setColor(NONE);
     }
     printf("%s", node->description);
-    if (node == selected && node->firstChild == NULL)
+    if (node->displayType != DT_NONE)
     {
+        unsigned char *nodeValue = readNodeValue(fp, node);
+
         printf(": ");
-        printNodeValue(fp, node);
+        if (node->displayType == DT_HEX)
+        {
+            printf("0x");
+            int charIdx = 0;
+            for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
+            {
+                for (int idx = 0; idx < node->segments[0].length; idx++, charIdx++)
+                {
+                    // TODO: Escape unprintable characters
+                    printf("%02X", nodeValue[idx]);
+                }
+            }
+        } else if (node->displayType == DT_ASCIZ)
+        {
+            printf("%s", nodeValue);
+        } else if (node->displayType == DT_ASCII)
+        {
+            int charIdx = 0;
+            for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
+            {
+                for (int idx = 0; idx < node->segments[0].length; idx++, charIdx++)
+                {
+                    // TODO: Escape unprintable characters
+                    printf("%c", toPrintableChar(nodeValue[idx]));
+                }
+            }
+        }
+
+        free(nodeValue);
     }
     printf("\n");
 

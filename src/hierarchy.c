@@ -4,10 +4,10 @@
 
 Node * newNode(char *description, long offset, long length)
 {
-    return newNodeEx(description, (Segment[]){{.offset = offset, .length = length}}, 1);
+    return newNodeEx(description, (Segment[]){{.offset = offset, .length = length}}, 1, DT_NONE);
 }
 
-Node * newNodeEx(char *description, Segment *segments, int segmentCnt)
+Node * newNodeEx(char *description, Segment *segments, int segmentCnt, DisplayType displayType)
 {
     Node *node = malloc(sizeof(Node));
 
@@ -23,6 +23,8 @@ Node * newNodeEx(char *description, Segment *segments, int segmentCnt)
         node->segmentCnt = 0;
         node->segments = NULL;
     }
+
+    node->displayType = displayType;
     
     node->firstChild = NULL;
     node->lastChild = NULL;
