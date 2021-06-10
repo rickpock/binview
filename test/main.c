@@ -31,6 +31,8 @@ void findColorsRecur(const Node *rootNode, const Node *selected, long offset, lo
 void printHierarchy(FILE *fp, const Node *rootNode, const Node *selected);
 void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int depth);
 
+int isLittleEndian();
+
 int main(int argc, char **argv)
 {
     struct termios info;
@@ -395,19 +397,7 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
         unsigned char *nodeValue = readNodeValue(fp, node);
 
         printf(": ");
-        if (node->displayType == DT_HEX)
-        {
-            printf("0x");
-            int charIdx = 0;
-            for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
-            {
-                for (int idx = 0; idx < node->segments[0].length; idx++, charIdx++)
-                {
-                    // TODO: Escape unprintable characters
-                    printf("%02X", nodeValue[idx]);
-                }
-            }
-        } else if (node->displayType == DT_ASCIZ)
+        if (node->displayType == DT_ASCIZ)
         {
             printf("%s", nodeValue);
         } else if (node->displayType == DT_ASCII)
@@ -415,11 +405,63 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
             int charIdx = 0;
             for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
             {
-                for (int idx = 0; idx < node->segments[0].length; idx++, charIdx++)
+                for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
                 {
                     // TODO: Escape unprintable characters
-                    printf("%c", toPrintableChar(nodeValue[idx]));
+                    printf("%c", toPrintableChar(nodeValue[charIdx]));
                 }
+            }
+        } else if (node->displayType == DT_HEX)
+        {
+            printf("0x");
+            int charIdx = 0;
+            for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
+            {
+                for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
+                {
+                    printf("%02X", nodeValue[charIdx]);
+                }
+            }
+        } else if ((node->displayType & DT_INT) == DT_INT)
+        {
+            if ((isLittleEndian()) == ((node->displayType & DT_INT_OPT_BIGENDIAN) != DT_INT_OPT_BIGENDIAN))
+            {
+                // Both system and the node's value are little endian OR both system and the node's value are big endian
+                unsigned long value = 0;
+
+                // I believe this code works for both big endian
+                // // TODO: Rewrite to support multiple segments
+                // for (int charIdx = node->segments[0].length - 1, longIdx = sizeof(unsigned long) - 1; charIdx >= 0 && longIdx >= 0; charIdx--, longIdx--)
+                // {
+                //     // printf("\ncharIdx %i (%i)\nlongIdx %i\n", charIdx, nodeValue[charIdx], longIdx);
+                //     ((char *)&value)[longIdx] = nodeValue[charIdx];
+                // }
+
+                // I believe this code works for both little endian only
+                // // TODO: Rewrite to support multiple segments
+                for (int charIdx = 0, longIdx = 0; charIdx < node->segments[0].length && longIdx < sizeof(unsigned long); charIdx++, longIdx++)
+                {
+                    ((char *)&value)[longIdx] = nodeValue[charIdx];
+                }
+
+                printf("%ld", value);
+
+                // TODO: Display hex in big endian, even if the memory is in little endian
+                if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
+                {
+                    printf(" (0x");
+                    int charIdx = 0;
+                    for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
+                    {
+                        for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
+                        {
+                            printf("%02X", nodeValue[charIdx]);
+                        }
+                    }
+                    printf(")");
+                }
+            } else {
+                // TODO
             }
         }
 
@@ -437,4 +479,10 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
             childNode = childNode->nextSibling;
         }
     }
+}
+
+int isLittleEndian()
+{
+    short test = 1;
+    return *(char *)&test;
 }
