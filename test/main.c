@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <termios.h>
 
@@ -13,16 +14,22 @@ int expandNode(const Node *root, const Node *selected);
 
 unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
+long readAt(FILE *fp, long offset, long length, unsigned char* buffer);
+unsigned char* readNodeValue(FILE *fp, Node *node);
+short readNodeValueShort(FILE *fp, Node *node);
+long readNodeValueLong(FILE *fp, Node *node);
+
 void printHeader();
 void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
+void printNodeValue(FILE *fp, Node *node);
 
 void setColor(enum printColor color);
 
 void findColors(const Node *rootNode, const Node *selected, long offset, long length, int *result);
 void findColorsRecur(const Node *rootNode, const Node *selected, long offset, long length, int *result);
 
-void printHierarchy(const Node *rootNode, const Node *selected);
-void printHierarchyRecur(const Node *node, const Node *selected, int depth);
+void printHierarchy(FILE *fp, const Node *rootNode, const Node *selected);
+void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int depth);
 
 int main(int argc, char **argv)
 {
@@ -121,7 +128,7 @@ void draw(FILE *fp, const Node *root, const Node *selected)
 
     printf("\n");
 
-    printHierarchy(root, selected);
+    printHierarchy(fp, root, selected);
     setColor(NONE);
 }
 
@@ -193,6 +200,55 @@ inline int read16(FILE *fp, unsigned char* buffer)
     return 16;
 }
 
+inline long readAt(FILE *fp, long offset, long length, unsigned char* buffer)
+{
+    long origPos = ftell(fp);
+    if (fseek(fp, offset, SEEK_SET) != 0)
+    {
+        return 0;
+    }
+
+    long idx = 0;
+    for (; idx < length; idx++)
+    {
+        if (feof(fp))
+        { break; }
+
+        buffer[idx] = fgetc(fp);
+    }
+
+    fseek(fp, origPos, SEEK_SET);
+
+    return idx;
+}
+
+// !! Caller is responsible for freeing memory
+inline unsigned char *readNodeValue(FILE *fp, Node *node)
+{
+    // TODO: Work on more than one segment
+    unsigned char *buffer = malloc(sizeof(char) * node->segments[0].length);
+    readAt(fp, node->segments[0].offset, node->segments[0].length, buffer);   // TODO: Handle error case (return value != node->segments[0].length)
+    return buffer;
+}
+
+inline short readNodeValueShort(FILE *fp, Node *node)
+{
+    short *resultPtr = (short *)readNodeValue(fp, node);
+    short result = *resultPtr;
+    free(resultPtr);
+
+    return result;
+}
+
+inline long readNodeValueLong(FILE *fp, Node *node)
+{
+    long *resultPtr = (long *)readNodeValue(fp, node);
+    long result = *resultPtr;
+    free(resultPtr);
+
+    return result;
+}
+
 void printHeader()
 {
     setColor(NONE);
@@ -253,6 +309,20 @@ inline void print16(unsigned char* buffer, int bufferSz, long offset, int colors
     printf("\n");
 }
 
+void printNodeValue(FILE *fp, Node *node)
+{
+    unsigned char *nodeValue = readNodeValue(fp, node);
+
+    // TODO: Work on more than one segment
+    for (int idx = 0; idx < node->segments[0].length; idx++)
+    {
+        // TODO: Escape unprintable characters
+        printf("%c", toPrintableChar(nodeValue[idx]));
+    }
+
+    free(nodeValue);
+}
+
 void findColors(const Node *rootNode, const Node *selected, long offset, long length, int *result)
 {
     for (long resultIdx = 0; resultIdx < length; resultIdx++)
@@ -298,12 +368,12 @@ void findColorsRecur(const Node *rootNode, const Node *selected, long offset, lo
     }
 }
 
-void printHierarchy(const Node *rootNode, const Node *selected)
+void printHierarchy(FILE *fp, const Node *rootNode, const Node *selected)
 {
-    printHierarchyRecur(rootNode, selected, 0);
+    printHierarchyRecur(fp, rootNode, selected, 0);
 }
 
-void printHierarchyRecur(const Node *node, const Node *selected, int depth)
+void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int depth)
 {
     for (int depthIdx = 0; depthIdx < depth; depthIdx++)
     {
@@ -319,14 +389,20 @@ void printHierarchyRecur(const Node *node, const Node *selected, int depth)
     } else {
         setColor(NONE);
     }
-    printf("%s\n", node->description);
+    printf("%s", node->description);
+    if (node == selected && node->firstChild == NULL)
+    {
+        printf(": ");
+        printNodeValue(fp, node);
+    }
+    printf("\n");
 
     if (expandNode(node, selected))
     {
         Node *childNode = node->firstChild;
         while(childNode)
         {
-            printHierarchyRecur(childNode, selected, depth + 1);
+            printHierarchyRecur(fp, childNode, selected, depth + 1);
 
             childNode = childNode->nextSibling;
         }
