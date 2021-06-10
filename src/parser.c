@@ -27,7 +27,7 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode);
 Node *parse(FILE *fp)
 {
     // Length will be updated at the end of the function
-    Node *output = newNode("Zip File",  0, 0);
+    Node *output = newNode("Zip File",  0, 0, DT_NONE);
 
     char signatureBuffer[4];
 
@@ -66,7 +66,7 @@ Node *parse(FILE *fp)
 
 long readCentralDirectory(FILE *fp, long offset, Node *parentNode)
 {
-    Node *centralDirectory = newNode("Central Directory", offset, 0);
+    Node *centralDirectory = newNode("Central Directory", offset, 0, DT_NONE);
 
     char signatureBuffer[4];
 
@@ -109,37 +109,37 @@ long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
 
     int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
 
-    Node *headerNode = newNode("Local File Header", offset, localFileHeaderLen);
+    Node *headerNode = newNode("Local File Header", offset, localFileHeaderLen, DT_NONE);
     addChildNode(parentNode, headerNode);
-    Node *dataNode = newNode("File Data", offset + localFileHeaderLen, compressedSize);
+    Node *dataNode = newNode("File Data", offset + localFileHeaderLen, compressedSize, DT_NONE);
     addChildNode(parentNode, dataNode);
 
     addChildNode(headerNode,
-        newNodeEx("Signature", (Segment[]){{.offset = offset + 0x0, .length = 0x4}}, 1, DT_HEX));
+        newNode("Signature", offset + 0x0, 0x4, DT_HEX));
     addChildNode(headerNode,
-        newNode("Version", offset + 0x4, 0x2));
+        newNode("Version", offset + 0x4, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
     addChildNode(headerNode,
-        newNode("Flags", offset + 0x6, 0x2));
+        newNode("Flags", offset + 0x6, 0x2, DT_FLAGS));
     addChildNode(headerNode,
-        newNode("Compression method", offset + 0x8, 0x2));
+        newNode("Compression method", offset + 0x8, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
     addChildNode(headerNode,
-        newNode("File modification time", offset + 0xA, 0x2));
+        newNode("File modification time", offset + 0xA, 0x2, DT_BIT_CUSTOM));
     addChildNode(headerNode,
-        newNode("File modification date", offset + 0xC, 0x2));
+        newNode("File modification date", offset + 0xC, 0x2, DT_BIT_CUSTOM));
     addChildNode(headerNode,
-        newNode("CRC-32 checksum", offset + 0xE, 0x4));
+        newNode("CRC-32 checksum", offset + 0xE, 0x4, DT_HEX));
     addChildNode(headerNode,
-        newNode("Compressed size", offset + 0x12, 0x4));
+        newNode("Compressed size", offset + 0x12, 0x4, DT_INT | DT_INT_OPT_INCL_HEX));
     addChildNode(headerNode,
-        newNode("Uncompressed size", offset + 0x16, 0x4));
+        newNode("Uncompressed size", offset + 0x16, 0x4, DT_INT | DT_INT_OPT_INCL_HEX));
     addChildNode(headerNode,
-        newNode("File name length", offset + 0x1A, 0x2));
+        newNode("File name length", offset + 0x1A, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
     addChildNode(headerNode,
-        newNode("Extra field length", offset + 0x1C, 0x2));
+        newNode("Extra field length", offset + 0x1C, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
     addChildNode(headerNode,
-        newNodeEx("File name", (Segment[]){{.offset = offset + 0x1E, .length = fileNameLen}}, 1, DT_ASCII));
+        newNode("File name", offset + 0x1E, fileNameLen, DT_ASCII));
     addChildNode(headerNode,
-        newNode("Extra field", offset + 0x1E + fileNameLen, extraFieldLen));
+        newNode("Extra field", offset + 0x1E + fileNameLen, extraFieldLen, DT_NONE));
 
     fseek(fp, localFileHeaderLen + compressedSize, SEEK_CUR);
 
@@ -158,49 +158,50 @@ long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *parentNode)
 
     int centralDirectoryFileHeaderLen = 0x2e + fileNameLen + extraFieldLen + fileCommentLen;
 
-    Node *headerNode = newNode("Central Directory File Header", offset, centralDirectoryFileHeaderLen);
+    Node *headerNode = newNode("Central Directory File Header", offset, centralDirectoryFileHeaderLen, DT_NONE);
     addChildNode(parentNode, headerNode);
 
+    // TODO: Set DisplayTypes
     addChildNode(headerNode,
-        newNode("Signature", offset + 0x0, 0x4));
+        newNode("Signature", offset + 0x0, 0x4, DT_NONE));
     addChildNode(headerNode,
-        newNode("Version", offset + 0x4, 0x2));
+        newNode("Version", offset + 0x4, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("Version needed", offset + 0x6, 0x2));
+        newNode("Version needed", offset + 0x6, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("Flags", offset + 0x8, 0x2));
+        newNode("Flags", offset + 0x8, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("Compression method", offset + 0xA, 0x2));
+        newNode("Compression method", offset + 0xA, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("File modification time", offset + 0xC, 0x2));
+        newNode("File modification time", offset + 0xC, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("File modification date", offset + 0xE, 0x2));
+        newNode("File modification date", offset + 0xE, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("CRC-32 checksum", offset + 0x10, 0x4));
+        newNode("CRC-32 checksum", offset + 0x10, 0x4, DT_NONE));
     addChildNode(headerNode,
-        newNode("Compressed size", offset + 0x14, 0x4));
+        newNode("Compressed size", offset + 0x14, 0x4, DT_NONE));
     addChildNode(headerNode,
-        newNode("Uncompressed size", offset + 0x18, 0x4));
+        newNode("Uncompressed size", offset + 0x18, 0x4, DT_NONE));
     addChildNode(headerNode,
-        newNode("File name length", offset + 0x1C, 0x2));
+        newNode("File name length", offset + 0x1C, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("Extra field length", offset + 0x1E, 0x2));
+        newNode("Extra field length", offset + 0x1E, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("File comment length", offset + 0x20, 0x2));
+        newNode("File comment length", offset + 0x20, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("Disk # start", offset + 0x22, 0x2));
+        newNode("Disk # start", offset + 0x22, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("Internal attributes", offset + 0x24, 0x2));
+        newNode("Internal attributes", offset + 0x24, 0x2, DT_NONE));
     addChildNode(headerNode,
-        newNode("External attributes", offset + 0x26, 0x4));
+        newNode("External attributes", offset + 0x26, 0x4, DT_NONE));
     addChildNode(headerNode,
-        newNode("Offset of local header", offset + 0x2A, 0x4));
+        newNode("Offset of local header", offset + 0x2A, 0x4, DT_NONE));
     addChildNode(headerNode,
-        newNode("File name", offset + 0x2E, fileNameLen));
+        newNode("File name", offset + 0x2E, fileNameLen, DT_NONE));
     addChildNode(headerNode,
-        newNode("Extra field", offset + 0x2E + fileNameLen, extraFieldLen));
+        newNode("Extra field", offset + 0x2E + fileNameLen, extraFieldLen, DT_NONE));
     addChildNode(headerNode,
-        newNode("File comment", offset + 0x2E + fileNameLen + extraFieldLen, fileCommentLen));
+        newNode("File comment", offset + 0x2E + fileNameLen + extraFieldLen, fileCommentLen, DT_NONE));
 
     fseek(fp, centralDirectoryFileHeaderLen, SEEK_CUR);
 
@@ -215,7 +216,7 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode)
 
     int endOfCentralDirectoryRecordLen = 0x16 + commentLen;
 
-    Node *eocdrNode = newNode("End of Central Directory Record", offset, endOfCentralDirectoryRecordLen);
+    Node *eocdrNode = newNode("End of Central Directory Record", offset, endOfCentralDirectoryRecordLen, DT_NONE);
     addChildNode(parentNode, eocdrNode);
 
     fseek(fp, endOfCentralDirectoryRecordLen, SEEK_CUR);

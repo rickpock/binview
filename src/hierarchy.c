@@ -2,9 +2,9 @@
 #include <string.h>
 #include "hierarchy.h"
 
-Node * newNode(char *description, long offset, long length)
+Node * newNode(char *description, long offset, long length, DisplayType displayType)
 {
-    return newNodeEx(description, (Segment[]){{.offset = offset, .length = length}}, 1, DT_NONE);
+    return newNodeEx(description, (Segment[]){{.offset = offset, .length = length}}, 1, displayType);
 }
 
 Node * newNodeEx(char *description, Segment *segments, int segmentCnt, DisplayType displayType)
