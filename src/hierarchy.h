@@ -12,13 +12,26 @@ typedef enum DisplayType_t
     DT_NONE = 0x00,
 
     DT_ASCII = 0x10,            // Print each byte to the screen as an ASCII character
-    DT_ASCIZ = 0x11,            // Print the memory to the screen as a null-terminated ASCII string
+    DT_ASCII_OPT_NULL_TERM = 0x01,  // Stop printing the memory at the first \0 character
+    DT_ASCII_OPT_UNPRINTABLE_AS_HEX = 0x00,     // Display unprintable characters as their two-digit hex value, preceded by '\'. Display backslash (\) as '\\'.
+    DT_ASCII_OPT_UNPRINTABLE_AS_PERIOD = 0x02,  // Display unprintable characters as '.'.
 
+    DT_ASCIZ = DT_ASCII | DT_ASCII_OPT_NULL_TERM,   // Print the memory to the screen as a null-terminated ASCII string
+
+    // INT only supports a single segment on the node, and only up to eight bytes
+    // If multiple segments are used or more than eight bytes, the value displayed is truncated to the eight least-significant bytes of the first segment
     DT_INT = 0x20,              // Print the memory as an integer. Little endian is used unless DT_INT_OPT_BIGENDIAN flag is set
+    DT_INT_OPT_LITTLEENDIAN = 0x00,
     DT_INT_OPT_BIGENDIAN = 0x01,
-    DT_INT_OPT_INCL_HEX = 0x02,
+    DT_INT_OPT_EXCL_HEX = 0x00,
+    DT_INT_OPT_INCL_HEX = 0x02, // Next to the decimal value, print 0x followed by the hex value of each byte, from most-significant byte to least-significant byte
 
-    DT_HEX = 0x30,              // Print 0x followed by the hex value of each byte
+    DT_INT_HEX = DT_INT | DT_INT_OPT_INCL_HEX,
+
+    DT_HEX = 0x30,              // Print 0x followed by the hex value of each byte, in order of memory (default)
+    DT_HEX_OPT_MEM_ORDER = 0x00,
+    DT_HEX_OPT_REVERSE_MEM_ORDER = 0x01,    // Print higher memory bytes first. This makes sense if the memory is little endian and you want to display it most-significant byte first, as is typical for numbers.
+                                            // If considering this option, you may want to use DT_INT | DT_INT_OPT_INCL_HEX
 
     DT_FLAGS = 0x40,            // Print each bit and what it means
 
