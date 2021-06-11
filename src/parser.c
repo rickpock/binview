@@ -123,9 +123,9 @@ long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
     addChildNode(headerNode,
         newNode("Compression method", offset + 0x8, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
     addChildNode(headerNode,
-        newNode("File modification time", offset + 0xA, 0x2, DT_BIT_CUSTOM));
+        newNode("File modification time", offset + 0xA, 0x2, DT_CUSTOM_MSDOS_TIME));
     addChildNode(headerNode,
-        newNode("File modification date", offset + 0xC, 0x2, DT_BIT_CUSTOM));
+        newNode("File modification date", offset + 0xC, 0x2, DT_CUSTOM_MSDOS_DATE));
     addChildNode(headerNode,
         newNode("CRC-32 checksum", offset + 0xE, 0x4, DT_HEX));
     addChildNode(headerNode,

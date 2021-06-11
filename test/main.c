@@ -15,9 +15,9 @@ int expandNode(const Node *root, const Node *selected);
 unsigned char toPrintableChar(unsigned char ch);
 int read16(FILE *fp, unsigned char* buffer);
 long readAt(FILE *fp, long offset, long length, unsigned char* buffer);
-unsigned char* readNodeValue(FILE *fp, Node *node);
-short readNodeValueShort(FILE *fp, Node *node);
-long readNodeValueLong(FILE *fp, Node *node);
+unsigned char* readNodeValue(FILE *fp, const Node *node);
+unsigned short readNodeValueShort(FILE *fp, const Node *node);
+unsigned long readNodeValueLong(FILE *fp, const Node *node);
 
 void printHeader();
 void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
@@ -225,7 +225,7 @@ inline long readAt(FILE *fp, long offset, long length, unsigned char* buffer)
 }
 
 // !! Caller is responsible for freeing memory
-inline unsigned char *readNodeValue(FILE *fp, Node *node)
+inline unsigned char *readNodeValue(FILE *fp, const Node *node)
 {
     // TODO: Work on more than one segment
     unsigned char *buffer = malloc(sizeof(char) * node->segments[0].length);
@@ -233,19 +233,19 @@ inline unsigned char *readNodeValue(FILE *fp, Node *node)
     return buffer;
 }
 
-inline short readNodeValueShort(FILE *fp, Node *node)
+inline unsigned short readNodeValueShort(FILE *fp, const Node *node)
 {
-    short *resultPtr = (short *)readNodeValue(fp, node);
-    short result = *resultPtr;
+    unsigned short *resultPtr = (unsigned short *)readNodeValue(fp, node);
+    unsigned short result = *resultPtr;
     free(resultPtr);
 
     return result;
 }
 
-inline long readNodeValueLong(FILE *fp, Node *node)
+inline unsigned long readNodeValueLong(FILE *fp, const Node *node)
 {
-    long *resultPtr = (long *)readNodeValue(fp, node);
-    long result = *resultPtr;
+    unsigned long *resultPtr = (unsigned long *)readNodeValue(fp, node);
+    unsigned long result = *resultPtr;
     free(resultPtr);
 
     return result;
@@ -422,8 +422,10 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
                     printf("%02X", nodeValue[charIdx]);
                 }
             }
-        } else if ((node->displayType & DT_INT) == DT_INT)
+        } else if ((node->displayType & DT_CATEGORY) == DT_INT)
         {
+            // TODO: Check that at least one segment exists
+
             // Read memory from least-significant byte to most-significant byte
             // Write into the long from least-significant byte to most-significant byte
 
@@ -488,6 +490,24 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
                     printf(")");
                 }
             }
+        } else if ((node->displayType & DT_CUSTOM_MSDOS_DATE) == DT_CUSTOM_MSDOS_DATE)
+        {
+            // TODO: Check that at least one segment exists and that the node length is two bytes
+            unsigned short nodeValue = readNodeValueShort(fp, node);
+            unsigned short year = 1980 + ((nodeValue >> 9) & ((1 << 7) - 1));
+            unsigned short month = (nodeValue >> 5) & ((1 << 4) - 1);
+            unsigned short day = nodeValue & ((1 << 5) - 1);
+
+            printf("%u/%u/%u", month, day, year);
+        } else if ((node->displayType & DT_CUSTOM_MSDOS_TIME) == DT_CUSTOM_MSDOS_TIME)
+        {
+            // TODO: Check that at least one segment exists and that the node length is two bytes
+            unsigned short nodeValue = readNodeValueShort(fp, node);
+            unsigned short hour = 1980 + (nodeValue >> 11) & ((1 << 5) - 1);
+            unsigned short minute = (nodeValue >> 5) & ((1 << 6) - 1);
+            unsigned short second = (nodeValue & ((1 << 5) - 1)) * 2;
+
+            printf("%u:%u:%u", hour, minute, second);
         }
 
         free(nodeValue);
