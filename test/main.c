@@ -408,6 +408,9 @@ void printNodeValue(FILE *fp, const Node *node)
                 printf(")");
             }
         }
+    } else if ((node->displayType & DT_CATEGORY) == DT_NODE)
+    {
+        printNodeValue(fp, (Node *)node->displayInfo);
     } else if ((node->displayType & DT_CUSTOM_MSDOS_DATE) == DT_CUSTOM_MSDOS_DATE)
     {
         // TODO: Check that at least one segment exists and that the node length is two bytes

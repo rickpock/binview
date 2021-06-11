@@ -25,6 +25,7 @@ Node * newNodeEx(char *description, Segment *segments, int segmentCnt, DisplayTy
     }
 
     node->displayType = displayType;
+    node->displayInfo = NULL;
     
     node->firstChild = NULL;
     node->lastChild = NULL;

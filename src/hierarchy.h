@@ -42,17 +42,28 @@ typedef enum DisplayType_t
     // Enums where each possible value has a meaning
     DT_ENUMS = 0x50,
 
+    DT_NODE = 0x60, // Use the value of a child node
+
     // A custom bitwise interpretation -- Not yet implemented
-    DT_BIT_CUSTOM = 0x60,       // TODO
+    DT_BIT_CUSTOM = 0x70,       // TODO
 
     // Specific common data formats
-    DT_CUSTOM_UNIX_TIMESTAMP = 0x70,
-    DT_CUSTOM_MSDOS_DATE = 0x71,
-    DT_CUSTOM_MSDOS_TIME = 0x72,
+    DT_CUSTOM_UNIX_TIMESTAMP = 0x80,
+    DT_CUSTOM_MSDOS_DATE = 0x81,
+    DT_CUSTOM_MSDOS_TIME = 0x82,
 
     DT_CATEGORY = 0xF0,
     DT_OPTIONS = 0x0F
 } DisplayType;
+
+typedef struct DisplayInfoFlags_t
+{
+    char *description;
+    unsigned short lowBit;
+    unsigned short highBit;
+
+    struct DisplayInfoFlags_t *next;
+} DisplayInfoFlags;
 
 typedef struct Node_t
 {
@@ -62,6 +73,10 @@ typedef struct Node_t
     int segmentCnt;
 
     DisplayType displayType;
+    // A variant holding additional info, depending on displayType
+    // * For DT_NODE, displayInfo is a Node*
+    // * For DT_FLAGS, displayInfo is a DisplayInfoFlags*
+    void *displayInfo;  // If displayType is DT_NODE, displayInfo is a Node*
 
     struct Node_t *firstChild;
     struct Node_t *lastChild;
