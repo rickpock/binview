@@ -21,7 +21,7 @@ unsigned long readNodeValueLong(FILE *fp, const Node *node);
 
 void printHeader();
 void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
-void printNodeValue(FILE *fp, Node *node);
+void printNodeValue(FILE *fp, const Node *node);
 
 void setColor(enum printColor color);
 
@@ -311,15 +311,121 @@ inline void print16(unsigned char* buffer, int bufferSz, long offset, int colors
     printf("\n");
 }
 
-void printNodeValue(FILE *fp, Node *node)
+void printNodeValue(FILE *fp, const Node *node)
 {
     unsigned char *nodeValue = readNodeValue(fp, node);
 
-    // TODO: Work on more than one segment
-    for (int idx = 0; idx < node->segments[0].length; idx++)
+    if (node->displayType == DT_ASCIZ)
     {
-        // TODO: Escape unprintable characters
-        printf("%c", toPrintableChar(nodeValue[idx]));
+        printf("%s", nodeValue);
+    } else if (node->displayType == DT_ASCII)
+    {
+        int charIdx = 0;
+        for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
+        {
+            for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
+            {
+                // TODO: Escape unprintable characters
+                printf("%c", toPrintableChar(nodeValue[charIdx]));
+            }
+        }
+    } else if (node->displayType == DT_HEX)
+    {
+        printf("0x");
+        int charIdx = 0;
+        for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
+        {
+            for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
+            {
+                printf("%02X", nodeValue[charIdx]);
+            }
+        }
+    } else if ((node->displayType & DT_CATEGORY) == DT_INT)
+    {
+        // TODO: Check that at least one segment exists
+
+        // Read memory from least-significant byte to most-significant byte
+        // Write into the long from least-significant byte to most-significant byte
+
+        unsigned long value = 0;
+        if ((node->displayType & DT_INT_OPT_BIGENDIAN) != DT_INT_OPT_BIGENDIAN) // Memory is little endian
+        {
+            if (isLittleEndian())   // System is little endian
+            {
+                // Read memory from left to right
+                // Write into the long from left to right
+                for (int charIdx = 0, longIdx = 0; charIdx < node->segments[0].length && longIdx < sizeof(unsigned long); charIdx++, longIdx++)
+                {
+                    ((char *)&value)[longIdx] = nodeValue[charIdx];
+                }
+            } else {    // System is big endian
+                // Read memory from left to right
+                // Write into the long from right to left
+                for (int charIdx = 0, longIdx = sizeof(unsigned long) - 1; charIdx < node->segments[0].length && longIdx >= 0; charIdx++, longIdx--)
+                {
+                    ((char *)&value)[longIdx] = nodeValue[charIdx];
+                }
+            }
+
+            printf("%ld", value);
+
+            if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
+            {
+                printf(" (0x");
+                for (int charIdx = node->segments[0].length - 1; charIdx >= 0; charIdx--)
+                {
+                    printf("%02X", nodeValue[charIdx]);
+                }
+                printf(")");
+            }
+        } else {    // Memory is big endian
+            if (isLittleEndian())   // System is little endian
+            {
+                // Read memory from right to left
+                // Write into the long from left to right
+                for (int charIdx = node->segments[0].length - 1, longIdx = 0; charIdx >= 0 && longIdx < sizeof(unsigned long); charIdx--, longIdx++)
+                {
+                    ((char *)&value)[longIdx] = nodeValue[charIdx];
+                }
+            } else {    // System is big endian
+                // Read memory from right to left
+                // Write into the long from right to left
+                for (int charIdx = node->segments[0].length - 1, longIdx = sizeof(unsigned long) - 1; charIdx >= 0 && longIdx >= 0; charIdx--, longIdx--)
+                {
+                    ((char *)&value)[longIdx] = nodeValue[charIdx];
+                }
+            }
+
+            printf("%ld", value);
+
+            if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
+            {
+                printf(" (0x");
+                for (int charIdx = 0; charIdx < node->segments[0].length; charIdx++)
+                {
+                    printf("%02X", nodeValue[charIdx]);
+                }
+                printf(")");
+            }
+        }
+    } else if ((node->displayType & DT_CUSTOM_MSDOS_DATE) == DT_CUSTOM_MSDOS_DATE)
+    {
+        // TODO: Check that at least one segment exists and that the node length is two bytes
+        unsigned short nodeValue = readNodeValueShort(fp, node);
+        unsigned short year = 1980 + ((nodeValue >> 9) & ((1 << 7) - 1));
+        unsigned short month = (nodeValue >> 5) & ((1 << 4) - 1);
+        unsigned short day = nodeValue & ((1 << 5) - 1);
+
+        printf("%u/%u/%u", month, day, year);
+    } else if ((node->displayType & DT_CUSTOM_MSDOS_TIME) == DT_CUSTOM_MSDOS_TIME)
+    {
+        // TODO: Check that at least one segment exists and that the node length is two bytes
+        unsigned short nodeValue = readNodeValueShort(fp, node);
+        unsigned short hour = 1980 + (nodeValue >> 11) & ((1 << 5) - 1);
+        unsigned short minute = (nodeValue >> 5) & ((1 << 6) - 1);
+        unsigned short second = (nodeValue & ((1 << 5) - 1)) * 2;
+
+        printf("%u:%u:%u", hour, minute, second);
     }
 
     free(nodeValue);
@@ -394,123 +500,8 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
     printf("%s", node->description);
     if (node->displayType != DT_NONE)
     {
-        unsigned char *nodeValue = readNodeValue(fp, node);
-
         printf(": ");
-        if (node->displayType == DT_ASCIZ)
-        {
-            printf("%s", nodeValue);
-        } else if (node->displayType == DT_ASCII)
-        {
-            int charIdx = 0;
-            for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
-            {
-                for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
-                {
-                    // TODO: Escape unprintable characters
-                    printf("%c", toPrintableChar(nodeValue[charIdx]));
-                }
-            }
-        } else if (node->displayType == DT_HEX)
-        {
-            printf("0x");
-            int charIdx = 0;
-            for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
-            {
-                for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
-                {
-                    printf("%02X", nodeValue[charIdx]);
-                }
-            }
-        } else if ((node->displayType & DT_CATEGORY) == DT_INT)
-        {
-            // TODO: Check that at least one segment exists
-
-            // Read memory from least-significant byte to most-significant byte
-            // Write into the long from least-significant byte to most-significant byte
-
-            unsigned long value = 0;
-            if ((node->displayType & DT_INT_OPT_BIGENDIAN) != DT_INT_OPT_BIGENDIAN) // Memory is little endian
-            {
-                if (isLittleEndian())   // System is little endian
-                {
-                    // Read memory from left to right
-                    // Write into the long from left to right
-                    for (int charIdx = 0, longIdx = 0; charIdx < node->segments[0].length && longIdx < sizeof(unsigned long); charIdx++, longIdx++)
-                    {
-                        ((char *)&value)[longIdx] = nodeValue[charIdx];
-                    }
-                } else {    // System is big endian
-                    // Read memory from left to right
-                    // Write into the long from right to left
-                    for (int charIdx = 0, longIdx = sizeof(unsigned long) - 1; charIdx < node->segments[0].length && longIdx >= 0; charIdx++, longIdx--)
-                    {
-                        ((char *)&value)[longIdx] = nodeValue[charIdx];
-                    }
-                }
-
-                printf("%ld", value);
-
-                if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
-                {
-                    printf(" (0x");
-                    for (int charIdx = node->segments[0].length - 1; charIdx >= 0; charIdx--)
-                    {
-                        printf("%02X", nodeValue[charIdx]);
-                    }
-                    printf(")");
-                }
-            } else {    // Memory is big endian
-                if (isLittleEndian())   // System is little endian
-                {
-                    // Read memory from right to left
-                    // Write into the long from left to right
-                    for (int charIdx = node->segments[0].length - 1, longIdx = 0; charIdx >= 0 && longIdx < sizeof(unsigned long); charIdx--, longIdx++)
-                    {
-                        ((char *)&value)[longIdx] = nodeValue[charIdx];
-                    }
-                } else {    // System is big endian
-                    // Read memory from right to left
-                    // Write into the long from right to left
-                    for (int charIdx = node->segments[0].length - 1, longIdx = sizeof(unsigned long) - 1; charIdx >= 0 && longIdx >= 0; charIdx--, longIdx--)
-                    {
-                        ((char *)&value)[longIdx] = nodeValue[charIdx];
-                    }
-                }
-
-                printf("%ld", value);
-
-                if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
-                {
-                    printf(" (0x");
-                    for (int charIdx = 0; charIdx < node->segments[0].length; charIdx++)
-                    {
-                        printf("%02X", nodeValue[charIdx]);
-                    }
-                    printf(")");
-                }
-            }
-        } else if ((node->displayType & DT_CUSTOM_MSDOS_DATE) == DT_CUSTOM_MSDOS_DATE)
-        {
-            // TODO: Check that at least one segment exists and that the node length is two bytes
-            unsigned short nodeValue = readNodeValueShort(fp, node);
-            unsigned short year = 1980 + ((nodeValue >> 9) & ((1 << 7) - 1));
-            unsigned short month = (nodeValue >> 5) & ((1 << 4) - 1);
-            unsigned short day = nodeValue & ((1 << 5) - 1);
-
-            printf("%u/%u/%u", month, day, year);
-        } else if ((node->displayType & DT_CUSTOM_MSDOS_TIME) == DT_CUSTOM_MSDOS_TIME)
-        {
-            // TODO: Check that at least one segment exists and that the node length is two bytes
-            unsigned short nodeValue = readNodeValueShort(fp, node);
-            unsigned short hour = 1980 + (nodeValue >> 11) & ((1 << 5) - 1);
-            unsigned short minute = (nodeValue >> 5) & ((1 << 6) - 1);
-            unsigned short second = (nodeValue & ((1 << 5) - 1)) * 2;
-
-            printf("%u:%u:%u", hour, minute, second);
-        }
-
-        free(nodeValue);
+        printNodeValue(fp, node);
     }
     printf("\n");
 
