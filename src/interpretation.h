@@ -1,10 +1,7 @@
 #ifndef BINVIEW_INTERPRETATION
 #define BINVIEW_INTERPRETATION
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
-#include <iostream>
 
 using namespace std;
 
