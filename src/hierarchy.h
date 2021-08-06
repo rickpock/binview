@@ -87,7 +87,7 @@ typedef struct Node_t
     struct Node_t *prevSibling;
 } Node;
 
-Node * newNode(char *description, long offset, long length, DisplayType displayType);
+Node * newNode(char *description, long offset, long length, int displayType);
 Node * newNodeEx(char *description, Segment *segments, int segmentCnt, DisplayType displayType);
 
 void addChildNode(Node *parent, Node *child);

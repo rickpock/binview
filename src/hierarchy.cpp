@@ -2,21 +2,21 @@
 #include <string.h>
 #include "hierarchy.h"
 
-Node * newNode(char *description, long offset, long length, DisplayType displayType)
+Node * newNode(char *description, long offset, long length, int displayType)
 {
-    return newNodeEx(description, (Segment[]){{.offset = offset, .length = length}}, 1, displayType);
+    return newNodeEx(description, (Segment[]){{.offset = offset, .length = length}}, 1, (DisplayType)displayType);
 }
 
 Node * newNodeEx(char *description, Segment *segments, int segmentCnt, DisplayType displayType)
 {
-    Node *node = malloc(sizeof(Node));
+    Node *node = (Node *)malloc(sizeof(Node));
 
-    node->description = malloc(strlen(description) + 1);
+    node->description = (char*)malloc(strlen(description) + 1);
     strcpy(node->description, description);
 
     if (segmentCnt)
     {
-        node->segments = malloc(sizeof(Segment) * segmentCnt);
+        node->segments = (Segment *)malloc(sizeof(Segment) * segmentCnt);
         memcpy(node->segments, segments, sizeof(Segment) * segmentCnt);
         node->segmentCnt = segmentCnt;
     } else {

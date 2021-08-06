@@ -23,7 +23,7 @@ void printHeader();
 void print16(unsigned char* buffer, int bufferSz, long offset, int colors[]);
 void printNodeValue(FILE *fp, const Node *node);
 
-void setColor(enum printColor color);
+void setColor(int color);
 
 void findColors(const Node *rootNode, const Node *selected, long offset, long length, int *result);
 void findColorsRecur(const Node *rootNode, const Node *selected, long offset, long length, int *result);
@@ -156,7 +156,7 @@ int expandNode(const Node *root, const Node *selected)
     return 0;
 }
 
-void setColor(enum printColor color)
+void setColor(int color)
 {
     if (color == NONE)
     {
@@ -228,7 +228,7 @@ inline long readAt(FILE *fp, long offset, long length, unsigned char* buffer)
 inline unsigned char *readNodeValue(FILE *fp, const Node *node)
 {
     // TODO: Work on more than one segment
-    unsigned char *buffer = malloc(sizeof(char) * node->segments[0].length);
+    unsigned char *buffer = (unsigned char *)malloc(sizeof(char) * node->segments[0].length);
     readAt(fp, node->segments[0].offset, node->segments[0].length, buffer);   // TODO: Handle error case (return value != node->segments[0].length)
     return buffer;
 }
