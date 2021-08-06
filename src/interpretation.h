@@ -16,14 +16,14 @@ enum Locale
 class Interpretation
 {
 public:
-    string (*display)(const unsigned char*, Locale);
+    string (*format)(const unsigned char*, Locale);
 
     static void init();
 
 private:
     Interpretation();
-    Interpretation(string (*displayFunc)(const unsigned char*, Locale));
-    static string displayAsciiz(const unsigned char* data, Locale locale);
+    Interpretation(string (*formatFunc)(const unsigned char*, Locale));
+    static string formatAsciiz(const unsigned char* data, Locale locale);
 
 public:
     static Interpretation asciiz;

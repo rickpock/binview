@@ -1,6 +1,6 @@
 #include "interpretation.h"
 
-Interpretation::Interpretation(string (*displayFunc)(const unsigned char*, Locale)) : display(displayFunc)
+Interpretation::Interpretation(string (*formatFunc)(const unsigned char*, Locale)) : format(formatFunc)
 {
 }
 
@@ -10,10 +10,10 @@ Interpretation::Interpretation()
 
 void Interpretation::init()
 {
-    asciiz = Interpretation(Interpretation::displayAsciiz);
+    asciiz = Interpretation(Interpretation::formatAsciiz);
 }
 
-string Interpretation::displayAsciiz(const unsigned char* data, Locale locale)
+string Interpretation::formatAsciiz(const unsigned char* data, Locale locale)
 {
     return (char *)data;
 }
