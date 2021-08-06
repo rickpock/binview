@@ -7,6 +7,7 @@
 
 #include "../src/hierarchy.h"
 #include "../src/parser.h"
+#include "../src/interpretation.h"
 
 void draw(FILE *fp, const Node *root, const Node *selected);
 
@@ -35,6 +36,8 @@ int isLittleEndian();
 
 int main(int argc, char **argv)
 {
+    Interpretation::init();
+
     struct termios info;
     tcgetattr(0, &info);          /* get current terminal attirbutes; 0 is the file descriptor for stdin */
     info.c_lflag &= ~ICANON;      /* disable canonical mode */

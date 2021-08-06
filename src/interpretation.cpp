@@ -1,6 +1,6 @@
 #include "interpretation.h"
 
-Interpretation::Interpretation(void (*displayFunc)(const unsigned char*, Locale, char*)) : display(displayFunc)
+Interpretation::Interpretation(string (*displayFunc)(const unsigned char*, Locale)) : display(displayFunc)
 {
 }
 
@@ -13,9 +13,9 @@ void Interpretation::init()
     asciiz = Interpretation(Interpretation::displayAsciiz);
 }
 
-void Interpretation::displayAsciiz(const unsigned char* data, Locale locale, char * out)
+string Interpretation::displayAsciiz(const unsigned char* data, Locale locale)
 {
-    strcpy(out, (const char*)data);
+    return (char *)data;
 }
 
 Interpretation Interpretation::asciiz;

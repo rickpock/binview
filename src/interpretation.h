@@ -3,7 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
+#include <iostream>
+
+using namespace std;
 
 enum Locale
 {
@@ -13,14 +16,14 @@ enum Locale
 class Interpretation
 {
 public:
-    void (*display)(const unsigned char*, Locale, char*);
+    string (*display)(const unsigned char*, Locale);
 
     static void init();
 
 private:
     Interpretation();
-    Interpretation(void (*displayFunc)(const unsigned char*, Locale, char*));
-    static void displayAsciiz(const unsigned char* data, Locale locale, char * out);
+    Interpretation(string (*displayFunc)(const unsigned char*, Locale));
+    static string displayAsciiz(const unsigned char* data, Locale locale);
 
 public:
     static Interpretation asciiz;
