@@ -10,6 +10,8 @@ typedef unsigned char byte;
  *       aggregating other iterators) and I couldn't get C++ to generalize them.
  *
  *       In contrast, this implementation took me five minutes.
+ *
+ *       We're sticking with this implementation.
  */
 
 template<class T>
@@ -37,5 +39,8 @@ public:
 
     bool hasNext();
 };
+
+// TODO: FileIterator
+// TODO: AggByteIterator
 
 #endif
