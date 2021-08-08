@@ -193,13 +193,13 @@ inline unsigned char toPrintableChar(unsigned char ch)
  */
 inline int read16(FILE *fp, unsigned char* buffer)
 {
+    FileIterator<16> fi = FileIterator<16>(fp, true);
     for (int counter = 0; counter < 16; counter++)
     {
-        buffer[counter] = fgetc(fp);
-        if (buffer[counter] == (unsigned char)EOF)
-        {
-            return counter;
-        }
+        if (! fi.hasNext())
+        { return counter; }
+
+        buffer[counter] = fi.next();
     }
 
     return 16;
@@ -207,22 +207,13 @@ inline int read16(FILE *fp, unsigned char* buffer)
 
 inline long readAt(FILE *fp, long offset, long length, unsigned char* buffer)
 {
-    long origPos = ftell(fp);
-    if (fseek(fp, offset, SEEK_SET) != 0)
-    {
-        return 0;
-    }
+    FileIterator<256> fi = FileIterator<256>(fp, offset, length, false);
 
     long idx = 0;
-    for (; idx < length; idx++)
+    for ( ; fi.hasNext(); idx++)
     {
-        if (feof(fp))
-        { break; }
-
-        buffer[idx] = fgetc(fp);
+        buffer[idx] = fi.next();
     }
-
-    fseek(fp, origPos, SEEK_SET);
 
     return idx;
 }
