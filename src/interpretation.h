@@ -20,10 +20,10 @@ public:
 private:
     Interpretation();
     Interpretation(string (*formatFunc)(const unsigned char*, Locale));
-    static string formatAsciiz(const unsigned char* data, Locale locale);
+    static string formatAsciz(const unsigned char* data, Locale locale);
 
 public:
-    static Interpretation asciiz;
+    static Interpretation asciz;
 };
 
 #endif

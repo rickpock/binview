@@ -10,12 +10,12 @@ Interpretation::Interpretation()
 
 void Interpretation::init()
 {
-    asciiz = Interpretation(Interpretation::formatAsciiz);
+    asciz = Interpretation(Interpretation::formatAsciz);
 }
 
-string Interpretation::formatAsciiz(const unsigned char* data, Locale locale)
+string Interpretation::formatAsciz(const unsigned char* data, Locale locale)
 {
     return (char *)data;
 }
 
-Interpretation Interpretation::asciiz;
+Interpretation Interpretation::asciz;
