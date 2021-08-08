@@ -1,6 +1,6 @@
 #include "interpretation.h"
 
-Interpretation::Interpretation(string (*formatFunc)(const byte*, Locale)) : format(formatFunc)
+Interpretation::Interpretation(string (*formatFunc)(IByteIterator&, Locale)) : format(formatFunc)
 {
 }
 
@@ -13,9 +13,14 @@ void Interpretation::init()
     asciz = Interpretation(Interpretation::formatAsciz);
 }
 
-string Interpretation::formatAsciz(const byte* data, Locale locale)
+string Interpretation::formatAsciz(IByteIterator& data, Locale locale)
 {
-    return (char *)data;
+    string out = "";
+    while(data.hasNext())
+    {
+        out += data.next();
+    }
+    return out;
 }
 
 Interpretation Interpretation::asciz;

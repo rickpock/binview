@@ -14,14 +14,14 @@ enum Locale
 class Interpretation
 {
 public:
-    string (*format)(const byte*, Locale);
+    string (*format)(IByteIterator&, Locale);
 
     static void init();
 
 private:
     Interpretation();
-    Interpretation(string (*formatFunc)(const byte*, Locale));
-    static string formatAsciz(const byte* data, Locale locale);
+    Interpretation(string (*formatFunc)(IByteIterator&, Locale));
+    static string formatAsciz(IByteIterator& data, Locale locale);
 
 public:
     static Interpretation asciz;
