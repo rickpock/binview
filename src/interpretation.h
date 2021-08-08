@@ -2,6 +2,7 @@
 #define BINVIEW_INTERPRETATION
 
 #include <string>
+#include "byteIterator.h"
 
 using namespace std;
 
@@ -13,14 +14,14 @@ enum Locale
 class Interpretation
 {
 public:
-    string (*format)(const unsigned char*, Locale);
+    string (*format)(const byte*, Locale);
 
     static void init();
 
 private:
     Interpretation();
-    Interpretation(string (*formatFunc)(const unsigned char*, Locale));
-    static string formatAsciz(const unsigned char* data, Locale locale);
+    Interpretation(string (*formatFunc)(const byte*, Locale));
+    static string formatAsciz(const byte* data, Locale locale);
 
 public:
     static Interpretation asciz;

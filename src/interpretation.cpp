@@ -1,6 +1,6 @@
 #include "interpretation.h"
 
-Interpretation::Interpretation(string (*formatFunc)(const unsigned char*, Locale)) : format(formatFunc)
+Interpretation::Interpretation(string (*formatFunc)(const byte*, Locale)) : format(formatFunc)
 {
 }
 
@@ -13,7 +13,7 @@ void Interpretation::init()
     asciz = Interpretation(Interpretation::formatAsciz);
 }
 
-string Interpretation::formatAsciz(const unsigned char* data, Locale locale)
+string Interpretation::formatAsciz(const byte* data, Locale locale)
 {
     return (char *)data;
 }
