@@ -2,40 +2,38 @@
 #include <string.h>
 #include "hierarchy.h"
 
-Node * newNode(const char *description, long offset, long length, int displayType)
+#include <stdio.h>
+
+Node::Node(const char *description, long offset, long length, int displayType)
 {
-    return newNodeEx(description, (Segment[]){{.offset = offset, .length = length}}, 1, (DisplayType)displayType);
+    this->init(description, (Segment[]){{.offset = offset, .length = length}}, 1, (DisplayType)displayType);
 }
 
-Node * newNodeEx(const char *description, Segment *segments, int segmentCnt, DisplayType displayType)
+void Node::init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType)
 {
-    Node *node = (Node *)malloc(sizeof(Node));
-
-    node->description = (char*)malloc(strlen(description) + 1);
-    strcpy(node->description, description);
+    this->description = (char*)malloc(strlen(description) + 1);
+    strcpy(this->description, description);
 
     if (segmentCnt)
     {
-        node->segments = (Segment *)malloc(sizeof(Segment) * segmentCnt);
-        memcpy(node->segments, segments, sizeof(Segment) * segmentCnt);
-        node->segmentCnt = segmentCnt;
+        this->segments = (Segment *)malloc(sizeof(Segment) * segmentCnt);
+        memcpy(this->segments, segments, sizeof(Segment) * segmentCnt);
+        this->segmentCnt = segmentCnt;
     } else {
-        node->segmentCnt = 0;
-        node->segments = NULL;
+        this->segmentCnt = 0;
+        this->segments = NULL;
     }
 
-    node->displayType = displayType;
-    node->displayInfo = NULL;
+    this->displayType = displayType;
+    this->displayInfo = NULL;
     
-    node->firstChild = NULL;
-    node->lastChild = NULL;
+    this->firstChild = NULL;
+    this->lastChild = NULL;
 
-    node->parent = NULL;
+    this->parent = NULL;
 
-    node->nextSibling = NULL;
-    node->prevSibling = NULL;
-
-    return node;
+    this->nextSibling = NULL;
+    this->prevSibling = NULL;
 }
 
 void addChildNode(Node *parent, Node *child)

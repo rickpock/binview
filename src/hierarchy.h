@@ -1,13 +1,13 @@
 #ifndef BINVIEW_HIERARCHY
 #define BINVIEW_HIERARCHY
 
-typedef struct
+struct Segment
 {
     long offset;
     long length;
-} Segment;
+};
 
-typedef enum DisplayType_t
+enum DisplayType
 {
     DT_NONE = 0x00,
 
@@ -54,19 +54,20 @@ typedef enum DisplayType_t
 
     DT_CATEGORY = 0xF0,
     DT_OPTIONS = 0x0F
-} DisplayType;
+};
 
-typedef struct DisplayInfoFlags_t
+struct DisplayInfoFlags
 {
     char *description;
     unsigned short lowBit;
     unsigned short highBit;
 
-    struct DisplayInfoFlags_t *next;
-} DisplayInfoFlags;
+    DisplayInfoFlags *next;
+};
 
-typedef struct Node_t
+class Node
 {
+public:
     char *description;
 
     Segment *segments;
@@ -78,17 +79,18 @@ typedef struct Node_t
     // * For DT_FLAGS, displayInfo is a DisplayInfoFlags*
     void *displayInfo;  // If displayType is DT_NODE, displayInfo is a Node*
 
-    struct Node_t *firstChild;
-    struct Node_t *lastChild;
+    Node *firstChild;
+    Node *lastChild;
 
-    struct Node_t *parent;
+    Node *parent;
 
-    struct Node_t *nextSibling;    // Children are a linked list. The first child points to the next.
-    struct Node_t *prevSibling;
-} Node;
+    Node *nextSibling;    // Children are a linked list. The first child points to the next.
+    Node *prevSibling;
 
-Node * newNode(const char *description, long offset, long length, int displayType);
-Node * newNodeEx(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);
+    Node(const char *description, long offset, long length, int displayType);
+private:
+    void init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);
+};
 
 void addChildNode(Node *parent, Node *child);
 
