@@ -1,13 +1,13 @@
 #ifndef BINVIEW_HIERARCHY
 #define BINVIEW_HIERARCHY
 
-typedef struct
+struct Segment
 {
     long offset;
     long length;
-} Segment;
+};
 
-typedef enum DisplayType_t
+enum DisplayType
 {
     DT_NONE = 0x00,
 
@@ -54,16 +54,16 @@ typedef enum DisplayType_t
 
     DT_CATEGORY = 0xF0,
     DT_OPTIONS = 0x0F
-} DisplayType;
+};
 
-typedef struct DisplayInfoFlags_t
+struct DisplayInfoFlags
 {
     char *description;
     unsigned short lowBit;
     unsigned short highBit;
 
-    struct DisplayInfoFlags_t *next;
-} DisplayInfoFlags;
+    DisplayInfoFlags *next;
+};
 
 typedef struct Node_t
 {
