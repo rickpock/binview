@@ -65,8 +65,9 @@ struct DisplayInfoFlags
     DisplayInfoFlags *next;
 };
 
-typedef struct Node_t
+class Node
 {
+public:
     char *description;
 
     Segment *segments;
@@ -78,17 +79,18 @@ typedef struct Node_t
     // * For DT_FLAGS, displayInfo is a DisplayInfoFlags*
     void *displayInfo;  // If displayType is DT_NODE, displayInfo is a Node*
 
-    struct Node_t *firstChild;
-    struct Node_t *lastChild;
+    Node *firstChild;
+    Node *lastChild;
 
-    struct Node_t *parent;
+    Node *parent;
 
-    struct Node_t *nextSibling;    // Children are a linked list. The first child points to the next.
-    struct Node_t *prevSibling;
-} Node;
+    Node *nextSibling;    // Children are a linked list. The first child points to the next.
+    Node *prevSibling;
 
-Node * newNode(const char *description, long offset, long length, int displayType);
-Node * newNodeEx(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);
+    Node(const char *description, long offset, long length, int displayType);
+private:
+    void init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);
+};
 
 void addChildNode(Node *parent, Node *child);
 
