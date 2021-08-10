@@ -8,12 +8,17 @@ Interpretation::Interpretation()
 {
 }
 
-void Interpretation::init()
+string Interpretation::formatAsciz(IByteIterator& data, Locale locale)
 {
-    asciz = Interpretation(Interpretation::formatAsciz);
+    string out = "";
+    while(data.hasNext() && data.next())
+    {
+        out += data.next();
+    }
+    return out;
 }
 
-string Interpretation::formatAsciz(IByteIterator& data, Locale locale)
+string Interpretation::formatAscii(IByteIterator& data, Locale locale)
 {
     string out = "";
     while(data.hasNext())
@@ -23,4 +28,5 @@ string Interpretation::formatAsciz(IByteIterator& data, Locale locale)
     return out;
 }
 
-Interpretation Interpretation::asciz;
+Interpretation Interpretation::asciz = Interpretation(Interpretation::formatAsciz);
+Interpretation Interpretation::ascii = Interpretation(Interpretation::formatAscii);

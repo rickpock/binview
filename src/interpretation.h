@@ -16,15 +16,15 @@ class Interpretation
 public:
     string (*format)(IByteIterator&, Locale);
 
-    static void init();
-
 private:
     Interpretation();
     Interpretation(string (*formatFunc)(IByteIterator&, Locale));
     static string formatAsciz(IByteIterator& data, Locale locale);
+    static string formatAscii(IByteIterator& data, Locale locale);
 
 public:
     static Interpretation asciz;
+    static Interpretation ascii;
 };
 
 #endif
