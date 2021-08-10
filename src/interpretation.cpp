@@ -28,5 +28,19 @@ string Interpretation::formatAscii(IByteIterator& data, Locale locale)
     return out;
 }
 
+string Interpretation::formatHex(IByteIterator& data, Locale locale)
+{
+    string out = "0x";
+
+    char buffer[3];
+    while(data.hasNext())
+    {
+        sprintf(buffer, "%02X", data.next());
+        out += buffer;
+    }
+    return out;
+}
+
 Interpretation Interpretation::asciz = Interpretation(Interpretation::formatAsciz);
 Interpretation Interpretation::ascii = Interpretation(Interpretation::formatAscii);
+Interpretation Interpretation::hex = Interpretation(Interpretation::formatHex);
