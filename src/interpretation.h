@@ -11,23 +11,36 @@ enum Locale
     LOCALE_EN_US
 };
 
+class AscizInterpretation;
+class AsciiInterpretation;
+class HexInterpretation;
+
 class Interpretation
 {
 public:
-    string (*format)(IByteIterator&, Locale);
+    virtual string format(IByteIterator&, Locale) = 0;
 
-private:
-    Interpretation();
-    Interpretation(string (*formatFunc)(IByteIterator&, Locale));
-    static string formatAsciz(IByteIterator& data, Locale locale);
-    static string formatAscii(IByteIterator& data, Locale locale);
-    static string formatHex(IByteIterator& data, Locale locale);
+    static AscizInterpretation asciz;
+    static AsciiInterpretation ascii;
+    static HexInterpretation hex;
+};
 
+class AscizInterpretation : public Interpretation
+{
 public:
-    static Interpretation asciz;
-    static Interpretation ascii;
+    string format(IByteIterator&, Locale);
+};
 
-    static Interpretation hex;
+class AsciiInterpretation : public Interpretation
+{
+public:
+    string format(IByteIterator&, Locale);
+};
+
+class HexInterpretation : public Interpretation
+{
+public:
+    string format(IByteIterator&, Locale);
 };
 
 #endif

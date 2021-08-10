@@ -1,14 +1,6 @@
 #include "interpretation.h"
 
-Interpretation::Interpretation(string (*formatFunc)(IByteIterator&, Locale)) : format(formatFunc)
-{
-}
-
-Interpretation::Interpretation()
-{
-}
-
-string Interpretation::formatAsciz(IByteIterator& data, Locale locale)
+string AscizInterpretation::format(IByteIterator& data, Locale Locale)
 {
     string out = "";
     while(data.hasNext() && data.next())
@@ -18,7 +10,7 @@ string Interpretation::formatAsciz(IByteIterator& data, Locale locale)
     return out;
 }
 
-string Interpretation::formatAscii(IByteIterator& data, Locale locale)
+string AsciiInterpretation::format(IByteIterator& data, Locale Locale)
 {
     string out = "";
     while(data.hasNext())
@@ -28,7 +20,7 @@ string Interpretation::formatAscii(IByteIterator& data, Locale locale)
     return out;
 }
 
-string Interpretation::formatHex(IByteIterator& data, Locale locale)
+string HexInterpretation::format(IByteIterator& data, Locale Locale)
 {
     string out = "0x";
 
@@ -41,6 +33,6 @@ string Interpretation::formatHex(IByteIterator& data, Locale locale)
     return out;
 }
 
-Interpretation Interpretation::asciz = Interpretation(Interpretation::formatAsciz);
-Interpretation Interpretation::ascii = Interpretation(Interpretation::formatAscii);
-Interpretation Interpretation::hex = Interpretation(Interpretation::formatHex);
+AscizInterpretation Interpretation::asciz = AscizInterpretation();
+AsciiInterpretation Interpretation::ascii = AsciiInterpretation();
+HexInterpretation Interpretation::hex = HexInterpretation();
