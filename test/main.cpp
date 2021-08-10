@@ -36,8 +36,6 @@ int isLittleEndian();
 
 int main(int argc, char **argv)
 {
-    Interpretation::init();
-
     struct termios info;
     tcgetattr(0, &info);          /* get current terminal attirbutes; 0 is the file descriptor for stdin */
     info.c_lflag &= ~ICANON;      /* disable canonical mode */
@@ -309,20 +307,14 @@ void printNodeValue(FILE *fp, const Node *node)
 {
     unsigned char *nodeValue = readNodeValue(fp, node);
 
+    MemoryIterator valueItr = MemoryIterator(nodeValue, node->segments[0].length);
+
     if (node->displayType == DT_ASCIZ)
     {
-        printf("%s", nodeValue);
+        printf("%s", Interpretation::asciz.format(valueItr, LOCALE_EN_US).c_str());
     } else if (node->displayType == DT_ASCII)
     {
-        int charIdx = 0;
-        for (int segmentIdx = 0; segmentIdx < node->segmentCnt; segmentIdx++)
-        {
-            for (int idx = 0; idx < node->segments[segmentIdx].length; idx++, charIdx++)
-            {
-                // TODO: Escape unprintable characters
-                printf("%c", toPrintableChar(nodeValue[charIdx]));
-            }
-        }
+        printf("%s", Interpretation::ascii.format(valueItr, LOCALE_EN_US).c_str());
     } else if (node->displayType == DT_HEX)
     {
         printf("0x");
