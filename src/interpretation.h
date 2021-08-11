@@ -14,6 +14,8 @@ enum Locale
 class AscizInterpretation;
 class AsciiInterpretation;
 class HexInterpretation;
+class MsdosDateInterpretation;
+class MsdosTimeInterpretation;
 
 class Interpretation
 {
@@ -23,6 +25,8 @@ public:
     static AscizInterpretation asciz;
     static AsciiInterpretation ascii;
     static HexInterpretation hex;
+    static MsdosDateInterpretation msdosDate;
+    static MsdosTimeInterpretation msdosTime;
 };
 
 class AscizInterpretation : public Interpretation
@@ -68,6 +72,18 @@ private:
     int opts;
 
     static bool isSystemLittleEndian();
+};
+
+class MsdosDateInterpretation : public Interpretation
+{
+public:
+    string format(IByteIterator&, Locale);
+};
+
+class MsdosTimeInterpretation : public Interpretation
+{
+public:
+    string format(IByteIterator&, Locale);
 };
 
 #endif

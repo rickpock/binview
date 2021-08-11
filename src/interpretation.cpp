@@ -33,6 +33,46 @@ string HexInterpretation::format(IByteIterator& data, Locale Locale)
     return out;
 }
 
+string MsdosDateInterpretation::format(IByteIterator& data, Locale Locale)
+{
+    // We assume two bytes of data for this interpretation
+    union
+    {
+        byte buffer[2] = {0, 0};
+        unsigned short value;
+    };
+    if (data.hasNext())
+    { buffer[0] = data.next(); }
+    if (data.hasNext())
+    { buffer[1] = data.next(); }
+
+    unsigned short year = 1980 + ((value >> 9) & ((1 << 7) - 1));
+    unsigned short month = (value >> 5) & ((1 << 4) - 1);
+    unsigned short day = value & ((1 << 5) - 1);
+
+    return std::to_string(month) + "/" + std::to_string(day) + "/" + std::to_string(year);
+}
+
+string MsdosTimeInterpretation::format(IByteIterator& data, Locale Locale)
+{
+    // We assume two bytes of data for this interpretation
+    union
+    {
+        byte buffer[2];
+        unsigned short value;
+    };
+    if (data.hasNext())
+    { buffer[0] = data.next(); }
+    if (data.hasNext())
+    { buffer[1] = data.next(); }
+
+    unsigned short hour = (value >> 11) & ((1 << 5) - 1);
+    unsigned short minute = (value >> 5) & ((1 << 6) - 1);
+    unsigned short second = (value & ((1 << 5) - 1)) * 2;
+
+    return std::to_string(hour) + ":" + std::to_string(minute) + ":" + std::to_string(second);
+}
+
 IntInterpretation::IntInterpretation(int opts) : opts(opts) {}
 
 bool IntInterpretation::isSystemLittleEndian()
@@ -174,3 +214,5 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
 AscizInterpretation Interpretation::asciz = AscizInterpretation();
 AsciiInterpretation Interpretation::ascii = AsciiInterpretation();
 HexInterpretation Interpretation::hex = HexInterpretation();
+MsdosDateInterpretation Interpretation::msdosDate = MsdosDateInterpretation();
+MsdosTimeInterpretation Interpretation::msdosTime = MsdosTimeInterpretation();

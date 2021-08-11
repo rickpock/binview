@@ -335,22 +335,10 @@ void printNodeValue(FILE *fp, const Node *node)
         printNodeValue(fp, (Node *)node->displayInfo);
     } else if ((node->displayType & DT_CUSTOM_MSDOS_DATE) == DT_CUSTOM_MSDOS_DATE)
     {
-        // TODO: Check that at least one segment exists and that the node length is two bytes
-        unsigned short nodeValue = readNodeValueShort(fp, node);
-        unsigned short year = 1980 + ((nodeValue >> 9) & ((1 << 7) - 1));
-        unsigned short month = (nodeValue >> 5) & ((1 << 4) - 1);
-        unsigned short day = nodeValue & ((1 << 5) - 1);
-
-        printf("%u/%u/%u", month, day, year);
+        printf("%s", Interpretation::msdosDate.format(valueItr, LOCALE_EN_US).c_str());
     } else if ((node->displayType & DT_CUSTOM_MSDOS_TIME) == DT_CUSTOM_MSDOS_TIME)
     {
-        // TODO: Check that at least one segment exists and that the node length is two bytes
-        unsigned short nodeValue = readNodeValueShort(fp, node);
-        unsigned short hour = 1980 + (nodeValue >> 11) & ((1 << 5) - 1);
-        unsigned short minute = (nodeValue >> 5) & ((1 << 6) - 1);
-        unsigned short second = (nodeValue & ((1 << 5) - 1)) * 2;
-
-        printf("%u:%u:%u", hour, minute, second);
+        printf("%s", Interpretation::msdosTime.format(valueItr, LOCALE_EN_US).c_str());
     }
 
     free(nodeValue);
