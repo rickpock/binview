@@ -320,72 +320,16 @@ void printNodeValue(FILE *fp, const Node *node)
         printf("%s", Interpretation::hex.format(valueItr, LOCALE_EN_US).c_str());
     } else if ((node->displayType & DT_CATEGORY) == DT_INT)
     {
-        // TODO: Check that at least one segment exists
-
-        // Read memory from least-significant byte to most-significant byte
-        // Write into the long from least-significant byte to most-significant byte
-
-        unsigned long value = 0;
-        if ((node->displayType & DT_INT_OPT_BIGENDIAN) != DT_INT_OPT_BIGENDIAN) // Memory is little endian
+        int opts = 0;
+        if ((node->displayType & DT_INT_OPT_BIGENDIAN) == DT_INT_OPT_BIGENDIAN)
         {
-            if (isLittleEndian())   // System is little endian
-            {
-                // Read memory from left to right
-                // Write into the long from left to right
-                for (int charIdx = 0, longIdx = 0; charIdx < node->segments[0].length && longIdx < sizeof(unsigned long); charIdx++, longIdx++)
-                {
-                    ((char *)&value)[longIdx] = nodeValue[charIdx];
-                }
-            } else {    // System is big endian
-                // Read memory from left to right
-                // Write into the long from right to left
-                for (int charIdx = 0, longIdx = sizeof(unsigned long) - 1; charIdx < node->segments[0].length && longIdx >= 0; charIdx++, longIdx--)
-                {
-                    ((char *)&value)[longIdx] = nodeValue[charIdx];
-                }
-            }
-
-            printf("%ld", value);
-
-            if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
-            {
-                printf(" (0x");
-                for (int charIdx = node->segments[0].length - 1; charIdx >= 0; charIdx--)
-                {
-                    printf("%02X", nodeValue[charIdx]);
-                }
-                printf(")");
-            }
-        } else {    // Memory is big endian
-            if (isLittleEndian())   // System is little endian
-            {
-                // Read memory from right to left
-                // Write into the long from left to right
-                for (int charIdx = node->segments[0].length - 1, longIdx = 0; charIdx >= 0 && longIdx < sizeof(unsigned long); charIdx--, longIdx++)
-                {
-                    ((char *)&value)[longIdx] = nodeValue[charIdx];
-                }
-            } else {    // System is big endian
-                // Read memory from right to left
-                // Write into the long from right to left
-                for (int charIdx = node->segments[0].length - 1, longIdx = sizeof(unsigned long) - 1; charIdx >= 0 && longIdx >= 0; charIdx--, longIdx--)
-                {
-                    ((char *)&value)[longIdx] = nodeValue[charIdx];
-                }
-            }
-
-            printf("%ld", value);
-
-            if ((node->displayType & DT_INT_OPT_INCL_HEX) == DT_INT_OPT_INCL_HEX)
-            {
-                printf(" (0x");
-                for (int charIdx = 0; charIdx < node->segments[0].length; charIdx++)
-                {
-                    printf("%02X", nodeValue[charIdx]);
-                }
-                printf(")");
-            }
+            opts |= IntInterpretation::OPT_BIG_ENDIAN;
         }
+        if ((node->displayType & DT_INT_OPT_INCL_HEX) != DT_INT_OPT_INCL_HEX)
+        {
+            opts |= IntInterpretation::OPT_EXCL_HEX;
+        }
+        printf("%s", IntInterpretation(opts).format(valueItr, LOCALE_EN_US).c_str());
     } else if ((node->displayType & DT_CATEGORY) == DT_NODE)
     {
         printNodeValue(fp, (Node *)node->displayInfo);
