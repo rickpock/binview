@@ -1,6 +1,8 @@
 #ifndef BINVIEW_HIERARCHY
 #define BINVIEW_HIERARCHY
 
+#include "interpretation.h"
+
 struct Segment
 {
     long offset;
@@ -73,6 +75,7 @@ public:
     Segment *segments;
     int segmentCnt;
 
+    Interpretation* pInterpretation;
     DisplayType displayType;
     // A variant holding additional info, depending on displayType
     // * For DT_NODE, displayInfo is a Node*

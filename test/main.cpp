@@ -309,36 +309,14 @@ void printNodeValue(FILE *fp, const Node *node)
 
     MemoryIterator valueItr = MemoryIterator(nodeValue, node->segments[0].length);
 
-    if (node->displayType == DT_ASCIZ)
+    if (node->pInterpretation != NULL)
     {
-        printf("%s", Interpretation::asciz->format(valueItr, LOCALE_EN_US).c_str());
-    } else if (node->displayType == DT_ASCII)
-    {
-        printf("%s", Interpretation::ascii->format(valueItr, LOCALE_EN_US).c_str());
-    } else if (node->displayType == DT_HEX)
-    {
-        printf("%s", Interpretation::hex->format(valueItr, LOCALE_EN_US).c_str());
-    } else if ((node->displayType & DT_CATEGORY) == DT_INT)
-    {
-        int opts = 0;
-        if ((node->displayType & DT_INT_OPT_BIGENDIAN) == DT_INT_OPT_BIGENDIAN)
+        printf("%s", node->pInterpretation->format(valueItr, LOCALE_EN_US).c_str());
+    } else {
+        if ((node->displayType & DT_CATEGORY) == DT_NODE)
         {
-            opts |= IntInterpretation::OPT_BIG_ENDIAN;
+            printNodeValue(fp, (Node *)node->displayInfo);
         }
-        if ((node->displayType & DT_INT_OPT_INCL_HEX) != DT_INT_OPT_INCL_HEX)
-        {
-            opts |= IntInterpretation::OPT_EXCL_HEX;
-        }
-        printf("%s", IntInterpretation(opts).format(valueItr, LOCALE_EN_US).c_str());
-    } else if ((node->displayType & DT_CATEGORY) == DT_NODE)
-    {
-        printNodeValue(fp, (Node *)node->displayInfo);
-    } else if ((node->displayType & DT_CUSTOM_MSDOS_DATE) == DT_CUSTOM_MSDOS_DATE)
-    {
-        printf("%s", Interpretation::msdosDate->format(valueItr, LOCALE_EN_US).c_str());
-    } else if ((node->displayType & DT_CUSTOM_MSDOS_TIME) == DT_CUSTOM_MSDOS_TIME)
-    {
-        printf("%s", Interpretation::msdosTime->format(valueItr, LOCALE_EN_US).c_str());
     }
 
     free(nodeValue);
