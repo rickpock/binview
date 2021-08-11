@@ -13,3 +13,8 @@ bool MemoryIterator::hasNext()
 {
     return _src + _len > curr;
 }
+
+void MemoryIterator::reset()
+{
+    curr = _src;
+}

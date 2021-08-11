@@ -20,6 +20,7 @@ class IIterator
 public:
     virtual T next() = 0;
     virtual bool hasNext() = 0;
+    virtual void reset() = 0;
 };
 
 typedef IIterator<byte> IByteIterator;
@@ -36,8 +37,8 @@ public:
     MemoryIterator(byte* src, long len);
 
     byte next();
-
     bool hasNext();
+    void reset();
 };
 
 #include <stdio.h>
@@ -51,6 +52,7 @@ private:
     bool _owner; // If this iterator does not own the file pointer, we need to reset the seek position after reading.
 
     long loc;    // Current location in the file. Used to seek if this iterator does not own the file pointer.
+    long start;
     long end;
 
     byte buffer[BUFFER_SZ];
@@ -99,7 +101,7 @@ private:
     }
 
 public:
-    FileIterator(FILE *fp, long offset, long len, bool owner = false) : _fp(fp), _owner(owner), loc(offset), end(len == -1 ? -1 : offset + len), bufferOffset(BUFFER_SZ) {};
+    FileIterator(FILE *fp, long offset, long len, bool owner = false) : _fp(fp), _owner(owner), loc(offset), start(offset), end(len == -1 ? -1 : offset + len), bufferOffset(BUFFER_SZ) {};
     FileIterator(FILE *fp, bool owner = false) : FileIterator(fp, 0L, -1L, owner) {}
     /* Note: If owner is set to false and no offset is specified, it will read from the beginning of the file
      *       If owner is set to true and no offset is specified, it will read from wherever fp was left
@@ -122,6 +124,20 @@ public:
         fillBufferIfNeeded();
 
         return bufferOffset < bufferBytes;
+    }
+
+    void reset()
+    {
+        loc = start;
+        bufferOffset = BUFFER_SZ;
+
+        if (_owner)
+        {
+            if (fseek(_fp, loc, SEEK_SET) != 0)
+            {
+                // TODO: Error handling
+            }
+        }
     }
 };
 
