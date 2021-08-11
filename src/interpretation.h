@@ -22,11 +22,11 @@ class Interpretation
 public:
     virtual string format(IByteIterator&, Locale) = 0;
 
-    static AscizInterpretation asciz;
-    static AsciiInterpretation ascii;
-    static HexInterpretation hex;
-    static MsdosDateInterpretation msdosDate;
-    static MsdosTimeInterpretation msdosTime;
+    static Interpretation* asciz;
+    static Interpretation* ascii;
+    static Interpretation* hex;
+    static Interpretation* msdosDate;
+    static Interpretation* msdosTime;
 };
 
 class AscizInterpretation : public Interpretation

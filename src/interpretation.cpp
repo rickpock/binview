@@ -211,8 +211,8 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
     return out;
 }
 
-AscizInterpretation Interpretation::asciz = AscizInterpretation();
-AsciiInterpretation Interpretation::ascii = AsciiInterpretation();
-HexInterpretation Interpretation::hex = HexInterpretation();
-MsdosDateInterpretation Interpretation::msdosDate = MsdosDateInterpretation();
-MsdosTimeInterpretation Interpretation::msdosTime = MsdosTimeInterpretation();
+Interpretation* Interpretation::asciz = new AscizInterpretation();
+Interpretation* Interpretation::ascii = new AsciiInterpretation();
+Interpretation* Interpretation::hex = new HexInterpretation();
+Interpretation* Interpretation::msdosDate = new MsdosDateInterpretation();
+Interpretation* Interpretation::msdosTime = new MsdosTimeInterpretation();

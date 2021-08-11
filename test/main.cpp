@@ -311,13 +311,13 @@ void printNodeValue(FILE *fp, const Node *node)
 
     if (node->displayType == DT_ASCIZ)
     {
-        printf("%s", Interpretation::asciz.format(valueItr, LOCALE_EN_US).c_str());
+        printf("%s", Interpretation::asciz->format(valueItr, LOCALE_EN_US).c_str());
     } else if (node->displayType == DT_ASCII)
     {
-        printf("%s", Interpretation::ascii.format(valueItr, LOCALE_EN_US).c_str());
+        printf("%s", Interpretation::ascii->format(valueItr, LOCALE_EN_US).c_str());
     } else if (node->displayType == DT_HEX)
     {
-        printf("%s", Interpretation::hex.format(valueItr, LOCALE_EN_US).c_str());
+        printf("%s", Interpretation::hex->format(valueItr, LOCALE_EN_US).c_str());
     } else if ((node->displayType & DT_CATEGORY) == DT_INT)
     {
         int opts = 0;
@@ -335,10 +335,10 @@ void printNodeValue(FILE *fp, const Node *node)
         printNodeValue(fp, (Node *)node->displayInfo);
     } else if ((node->displayType & DT_CUSTOM_MSDOS_DATE) == DT_CUSTOM_MSDOS_DATE)
     {
-        printf("%s", Interpretation::msdosDate.format(valueItr, LOCALE_EN_US).c_str());
+        printf("%s", Interpretation::msdosDate->format(valueItr, LOCALE_EN_US).c_str());
     } else if ((node->displayType & DT_CUSTOM_MSDOS_TIME) == DT_CUSTOM_MSDOS_TIME)
     {
-        printf("%s", Interpretation::msdosTime.format(valueItr, LOCALE_EN_US).c_str());
+        printf("%s", Interpretation::msdosTime->format(valueItr, LOCALE_EN_US).c_str());
     }
 
     free(nodeValue);
