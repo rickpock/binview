@@ -43,4 +43,31 @@ public:
     string format(IByteIterator&, Locale);
 };
 
+// TODO
+// WARNING: This interpretation only works up to "long" size
+class IntInterpretation : public Interpretation
+{
+public:
+    string format(IByteIterator&, Locale);
+
+    enum OPTIONS {
+        OPT_NONE = 0x0,
+
+        OPT_MASK_ENDIAN = 0x01,
+        OPT_LITTLE_ENDIAN = 0x00,
+        OPT_BIG_ENDIAN = 0x01,
+
+        OPT_MASK_HEX = 0x02,
+        OPT_INCL_HEX = 0x00,
+        OPT_EXCL_HEX = 0x02
+    };
+
+    IntInterpretation(int opts);
+
+private:
+    int opts;
+
+    static bool isSystemLittleEndian();
+};
+
 #endif
