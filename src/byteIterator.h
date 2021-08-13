@@ -1,6 +1,8 @@
 #ifndef BINVIEW_BYTE_ITERATOR
 #define BINVIEW_BYTE_ITERATOR
 
+#include <stdlib.h>
+
 typedef unsigned char byte;
 
 /* Note: I've made a valiant attempt to implement these as std::iterator's, 
@@ -141,6 +143,23 @@ public:
     }
 };
 
-// TODO: AggByteIterator
+class AggIterator : public IByteIterator
+{
+private:
+    IByteIterator** src;
+    int len;
+
+    int currIdx;
+
+    void advanceToNonEmptyIterator();
+
+public:
+    AggIterator(IByteIterator* src[], int len);
+    ~AggIterator();
+
+    byte next();
+    bool hasNext();
+    void reset();
+};
 
 #endif
