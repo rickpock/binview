@@ -81,12 +81,22 @@ IByteAccessor* AggAccessor::subset(long startIdx, long len)
         subsetArr[srcIdx] = src[srcIdx];
     }
 
-    return new AggAccessor(subsetArr, subsetLen);
+    AggAccessor* out = new AggAccessor(subsetArr, subsetLen);
+    free(subsetArr);
+    return out;
 }
 
 IByteIterator* AggAccessor::iterator()
 {
-    // TODO
+    IByteIterator** itrArr = (IByteIterator**)malloc(sizeof(IByteIterator*) * len);
+    for (int srcIdx = 0; srcIdx < len; srcIdx++)
+    {
+        itrArr[srcIdx] = src[srcIdx]->iterator();
+    }
+
+    AggIterator* out = new AggIterator(itrArr, len);
+    free(itrArr);
+    return out;
 }
 
 bool AggAccessor::srcIdxFromByteIdx(long byteIdx, int& srcIdx, long& offsetIdx)
