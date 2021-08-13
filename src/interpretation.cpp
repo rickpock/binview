@@ -211,6 +211,16 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
     return out;
 }
 
+NodeInterpretation::NodeInterpretation(DataNode* node) : node(node) {}
+
+string NodeInterpretation::format(IByteIterator& data, Locale locale)
+{
+    Interpretation* nodeInterpretation = node->node->pInterpretation;
+    IByteIterator* itr = node->accessor->iterator();
+
+    return nodeInterpretation->format(*itr, locale);
+}
+
 Interpretation* Interpretation::asciz = new AscizInterpretation();
 Interpretation* Interpretation::ascii = new AsciiInterpretation();
 Interpretation* Interpretation::hex = new HexInterpretation();

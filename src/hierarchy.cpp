@@ -98,3 +98,58 @@ void deleteNode(Node *node)
 
     free(node);
 }
+
+IByteAccessor* DataNode::getAccessorForChildNode(Node* node)
+{
+    if (node->segmentCnt == 1)
+    { return accessor->subset(node->segments[0].offset, node->segments[0].length); }
+
+    IByteAccessor** subsetArr = (IByteAccessor**)malloc(sizeof(IByteAccessor*) * node->segmentCnt);
+    for (int segIdx = 0; segIdx < node->segmentCnt; segIdx++)
+    {
+        subsetArr[segIdx] = accessor->subset(node->segments[segIdx].offset, node->segments[segIdx].length);
+    }
+
+    AggAccessor* out = new AggAccessor(subsetArr, node->segmentCnt);
+    free(subsetArr);
+    return out;
+}
+
+DataNode::DataNode(Node* node, IByteAccessor* accessor) : node(node), accessor(accessor)
+{
+    Node* child = node->firstChild;
+    DataNode* prevDataChild = NULL;
+    while (child)
+    {
+        IByteAccessor* childAccessor = getAccessorForChildNode(child);
+        DataNode* dataChild = new DataNode(child, accessor);
+
+        if (prevDataChild == NULL)
+        {
+            firstChild = dataChild;
+        } else {
+            dataChild->prevSibling = prevDataChild;
+            prevDataChild->nextSibling = dataChild;
+        }
+        lastChild = dataChild;
+        dataChild->parent = this;
+
+        prevDataChild = dataChild;
+        child = child->nextSibling;
+    }
+}
+
+DataNode* DataNode::findDescendant(Node* node)
+{
+    if (this->node == node)
+    { return this; }
+
+    for (DataNode* child = firstChild; child != NULL; child = child->nextSibling)
+    {
+        DataNode* found = child->findDescendant(node);
+        if (found != NULL)
+        { return found; }
+    }
+    return NULL;
+}
+

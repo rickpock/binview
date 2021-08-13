@@ -4,6 +4,10 @@
 #include <string>
 #include "byteIterator.h"
 
+class Interpretation;
+
+#include "hierarchy.h"
+
 using namespace std;
 
 enum Locale
@@ -78,6 +82,17 @@ class MsdosTimeInterpretation : public Interpretation
 {
 public:
     string format(IByteIterator&, Locale);
+};
+
+class NodeInterpretation : public Interpretation
+{
+public:
+    NodeInterpretation(DataNode* node);
+
+    string format(IByteIterator&, Locale);
+
+private:
+    DataNode* node;
 };
 
 #endif

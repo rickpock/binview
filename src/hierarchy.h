@@ -1,7 +1,11 @@
 #ifndef BINVIEW_HIERARCHY
 #define BINVIEW_HIERARCHY
 
+class Node;
+class DataNode;
+
 #include "interpretation.h"
+#include "byteAccessor.h"
 
 struct Segment
 {
@@ -93,6 +97,26 @@ public:
     Node(const char *description, long offset, long length, int displayType);
 private:
     void init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);
+};
+
+class DataNode
+{
+public:
+    Node* node;
+    IByteAccessor* accessor;
+
+    DataNode* firstChild = NULL;
+    DataNode* lastChild = NULL;
+    DataNode* parent = NULL;
+    DataNode* nextSibling = NULL;
+    DataNode* prevSibling = NULL;
+
+    DataNode(Node* node, IByteAccessor* accessor);
+
+    DataNode* findDescendant(Node* node);
+
+private:
+    IByteAccessor* getAccessorForChildNode(Node* node);
 };
 
 void addChildNode(Node *parent, Node *child);
