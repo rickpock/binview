@@ -1,6 +1,8 @@
 #ifndef BINVIEW_BYTE_ACCESSOR
 #define BINVIEW_BYTE_ACCESSOR
 
+#include <stdlib.h>
+
 #include "byteIterator.h"
 
 class IByteAccessor
@@ -20,6 +22,24 @@ private:
 
 public:
     MemoryAccessor(byte* src, long len);
+
+    byte& operator[](long);
+    long getSize();
+    IByteAccessor* subset(long, long);
+    IByteIterator* iterator();
+};
+
+class AggAccessor : public IByteAccessor
+{
+private:
+    IByteAccessor** src; // Array of pointers
+    int len;
+
+    bool srcIdxFromByteIdx(long byteIdx, int& srcIdx, long& offsetIdx);
+
+public:
+    AggAccessor(IByteAccessor*[], int);
+    ~AggAccessor();
 
     byte& operator[](long);
     long getSize();
