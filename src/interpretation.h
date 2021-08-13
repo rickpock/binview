@@ -11,12 +11,6 @@ enum Locale
     LOCALE_EN_US
 };
 
-class AscizInterpretation;
-class AsciiInterpretation;
-class HexInterpretation;
-class MsdosDateInterpretation;
-class MsdosTimeInterpretation;
-
 class Interpretation
 {
 public:
