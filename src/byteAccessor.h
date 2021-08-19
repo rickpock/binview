@@ -8,7 +8,7 @@
 class IByteAccessor
 {
 public:
-    virtual byte& operator[](long) = 0;
+    virtual byte operator[](long) = 0;
     virtual long getSize() = 0;
     virtual IByteAccessor* subset(long, long) = 0;
     virtual IByteIterator* iterator() = 0;
@@ -23,7 +23,29 @@ private:
 public:
     MemoryAccessor(byte* src, long len);
 
-    byte& operator[](long);
+    byte operator[](long);
+    long getSize();
+    IByteAccessor* subset(long, long);
+    IByteIterator* iterator();
+};
+
+class FileAccessor : public IByteAccessor
+{
+private:
+    FILE* fp;
+
+    long offset;
+    long len;
+
+    bool owner;
+
+    long fileSize = -1L;
+
+public:
+    FileAccessor(FILE *fp, long offset, long len, bool owner = false);
+    FileAccessor(FILE *fp, bool owner = false);
+
+    byte operator[](long);
     long getSize();
     IByteAccessor* subset(long, long);
     IByteIterator* iterator();
@@ -41,7 +63,7 @@ public:
     AggAccessor(IByteAccessor*[], int);
     ~AggAccessor();
 
-    byte& operator[](long);
+    byte operator[](long);
     long getSize();
     IByteAccessor* subset(long, long);
     IByteIterator* iterator();

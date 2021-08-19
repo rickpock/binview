@@ -61,6 +61,8 @@ Node *parse(FILE *fp)
 
     output->segments[0].length = offset;
 
+    DataNode* dn = new DataNode(output, new FileAccessor(fp));
+
     return output;
 }
 

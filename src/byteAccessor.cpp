@@ -2,7 +2,7 @@
 
 MemoryAccessor::MemoryAccessor(byte* src, long len) : src(src), len(len) {}
 
-byte& MemoryAccessor::operator[](long idx)
+byte MemoryAccessor::operator[](long idx)
 {
     return src[idx];
 }
@@ -40,7 +40,7 @@ AggAccessor::~AggAccessor()
     free(src);
 }
 
-byte& AggAccessor::operator[](long idx)
+byte AggAccessor::operator[](long idx)
 {
     int srcIdx;
     long offsetIdx;
@@ -116,4 +116,61 @@ bool AggAccessor::srcIdxFromByteIdx(long byteIdx, int& srcIdx, long& offsetIdx)
 
     offsetIdx = byteIdx;
     return true;
+}
+
+FileAccessor::FileAccessor(FILE *fp, long offset, long len, bool owner) : fp(fp), owner(owner), offset(offset), len(len) {}
+
+FileAccessor::FileAccessor(FILE *fp, bool owner) : FileAccessor(fp, 0L, -1L, owner) {}
+
+byte FileAccessor::operator[](long loc)
+{
+    long origPos;
+    if (! owner)
+    {
+        origPos = ftell(fp);
+        if (fseek(fp, loc, SEEK_SET) != 0)
+        {
+            // TODO: Error handling
+        }
+    }
+
+    if (feof(fp))
+    {
+        // TODO
+    }
+
+    byte out = fgetc(fp);
+
+    if (! owner)
+    {
+        fseek(fp, origPos, SEEK_SET); // TODO: Error handling
+    }
+
+    return out;
+}
+
+long FileAccessor::getSize()
+{
+    if (len != -1)
+    { return len; }
+
+    if (fileSize != -1L)
+    { return fileSize; }
+
+    long origPos = ftell(fp);
+    fseek(fp, 0L, SEEK_END);
+    fileSize = ftell(fp);
+    fseek(fp, origPos, SEEK_SET);
+
+    return fileSize;    
+}
+
+IByteAccessor* FileAccessor::subset(long offset, long len)
+{
+    return new FileAccessor(fp, this->offset + offset, len, false);
+}
+
+IByteIterator* FileAccessor::iterator()
+{
+    return new FileIterator<1024>(fp, offset, len, false);
 }
