@@ -389,11 +389,8 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
         setColor(NONE);
     }
     printf("%s", node->description);
-    if (node->displayType != DT_NONE)
-    {
-        printf(": ");
-        printNodeValue(fp, node);
-    }
+    printf(": ");
+    printNodeValue(fp, node);
     printf("\n");
 
     if (expandNode(node, selected))

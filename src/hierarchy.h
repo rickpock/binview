@@ -97,6 +97,7 @@ public:
     Node(const char *description, long offset, long length, int displayType);
 private:
     void init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);
+    void init(const char *description, Segment *segments, int segmentCnt, Interpretation* interpretation);
 };
 
 class DataNode
