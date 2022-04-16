@@ -1,0 +1,83 @@
+---
+zip
+---
+condition:
+	Extension == "zip"
+format:
+	[
+		variant(
+			it->localFileHeader->signature == 0x04034b50 -> localFile (auto),
+			it->centralDirectoryFileHeader->signature == 0x02014b50 -> centralDirectory (auto),
+		)
+	]*
+
+---------
+localFile
+---------
+format:
+	localFileHeader (auto),
+	localFileData (this.localFileHeader.compressedSize)
+
+---------------
+localFileHeader
+---------------
+format:
+	signature (4),
+	version (2),
+	flags (2),
+	compressionMethod (2),
+	fileModificationTime (2),
+	fileModificationDate (2),
+	crc32Checksum (4),
+	compressedSize (4),
+	uncompressedSize (4),
+	fileNameLength (2),
+	extraFieldLength (2),
+	fileName (this.fileNameLength),
+	extraField (this.extraFieldLength)
+
+----------------
+centralDirectory
+----------------
+format:
+	centralDirectoryFileHeader (auto),
+	endOfCentralDirectoryRecord (auto)
+
+--------------------------
+centralDirectoryFileHeader
+--------------------------
+format:
+	signature (4),
+	version (2),
+	versionNeeded (2),
+	flags (2),
+	compressionMethod (2),
+	fileModificationTime (2),
+	fileModificationDate (2),
+	crc32Checksum (4),
+	compressedSize (4),
+	uncompressedSize (4),
+	fileNameLength (2),
+	extraFieldLength (2),
+	fileCommentLength (2),
+	diskNoStart (2),
+	internalAttributes (2),
+	externalAttributes (4),
+	offsetOfLocalHeader (4),
+	fileName (this.fileNameLength),
+	extraField (this.extraFieldLength),
+	fileComment (this.fileCommentLength)
+
+---------------------------
+endOfCentralDirectoryRecord
+---------------------------
+format:
+	signature (4),
+	diskNo (2),
+	centralDirectoryStartDisk (2),
+	numOfCentralDirectoryRecordsOnDisk (2),
+	numofCentralDirectoryRecords (2),
+	centralDirectoryLen (4),
+	offsetOfCentralDirectory (4),
+	commentLen (2),
+	comment (this.commentLen)

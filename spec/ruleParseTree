@@ -1,0 +1,26 @@
+
+rule:
+	match | logic_expression
+
+logic_expression:
+	binary_logic_operator rule rule
+	unary_logic_operator rule
+
+binary_logic_operator:
+	OR | AND
+
+unary_logic_operator:
+	NOT
+
+match:
+	path cond const
+
+cond:
+	== | != | < | <= | > | >=
+
+path:
+	start -> path_recur
+
+path_recur:
+	field
+	field -> path_recur

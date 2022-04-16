@@ -1,0 +1,25 @@
+hffVersion=1
+namespace=zip
+
+format zip(
+	collection(
+		variant(
+			(it->localFileHeader->signature == 0x04034b50, localFile, auto, node(it->localFileHeader))
+			(it->centralDirectoryFileHeader->signature == 0x02014b50, centralDirectory, auto, node(it->centralDirectoryFileHeader))
+		)
+	)
+)
+
+format localFile(
+	sequence(
+		(localFileHeader, auto, node(it->fileName))
+		(localFileData, this->localFileHeader->compressedSize, hex)
+	)
+)
+
+format localFileHeader(
+	sequence(
+		(signature, 4, hex)
+		(version, 2, intAndHex)
+		(flags, 2, flags(TODO))
+		TODO

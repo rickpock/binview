@@ -1,0 +1,65 @@
+FormatTree
+  String name
+  FormatNode* root
+  
+/**************/
+
+abstract Size
+
+ConstSize : Size
+  unsigned int size // bytes
+
+AutoSize : Size
+
+RelativeSize : Size
+  Path path
+
+/**************/
+
+abstract FormatNode
+  String name
+  Size size
+
+CollectionNode : FormatNode
+  unsigned int minCount, maxCount // maxCount == 0 means unlimited
+  FormatNode* child
+
+VariantNode : FormatNode
+  unsigned int count
+  VariantStruct[count]
+
+VariantStruct
+  Rule rule
+  FormatNode* node
+
+SequenceNode : FormatNode
+  unsigned int count
+  FormatNode*[] children
+
+FieldNode : FormatNode
+  // size must not be AutoSize
+
+/**************/
+
+abstract PathNode
+  PathNode next // null means end of path
+
+ParentPathNode : PathNode
+
+ChildPathNode : PathNode
+  String field
+
+Path
+  PathNode root
+  
+
+/**************/
+
+abstract Rule
+
+// TODO: ExpressionRule (future version)
+
+MatchRule : Rule
+  Path path
+  Condition cond
+  long const // TODO: Change for arbitrary length -- Determine length by field size?
