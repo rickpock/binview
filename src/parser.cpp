@@ -111,9 +111,12 @@ long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
 
     int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
 
+    Node *filenameNode;
     Node *headerNode = new Node("Local File Header", offset, localFileHeaderLen, DT_NODE);
+    headerNode->displayInfo = (void *)filenameNode;
     addChildNode(parentNode, headerNode);
     Node *dataNode = new Node("File Data", offset + localFileHeaderLen, compressedSize, DT_NODE);
+    dataNode->displayInfo = (void *)filenameNode;
     addChildNode(parentNode, dataNode);
 
     addChildNode(headerNode,
@@ -138,10 +141,8 @@ long readLocalFileHeader(FILE *fp, long offset, Node *parentNode)
         new Node("File name length", offset + 0x1A, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
     addChildNode(headerNode,
         new Node("Extra field length", offset + 0x1C, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
-    Node *filenameNode = new Node("File name", offset + 0x1E, fileNameLen, DT_ASCII);
+    filenameNode = new Node("File name", offset + 0x1E, fileNameLen, DT_ASCII);
     addChildNode(headerNode, filenameNode);
-    headerNode->displayInfo = (void *)filenameNode;
-    dataNode->displayInfo = (void *)filenameNode;
     addChildNode(headerNode,
         new Node("Extra field", offset + 0x1E + fileNameLen, extraFieldLen, DT_HEX));
 
