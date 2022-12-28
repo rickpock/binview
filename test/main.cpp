@@ -27,7 +27,7 @@ void printNodeValue(FILE *fp, const Node *node);
 void setColor(int color);
 
 void findColors(const Node *rootNode, const Node *selected, long offset, long length, int *result);
-void findColorsRecur(const Node *rootNode, const Node *selected, long offset, long length, int *result);
+void findColorsRecur(const Node *rootNode, long rootOffset, const Node *selected, long offset, long length, int *result);
 
 void printHierarchy(FILE *fp, const Node *rootNode, const Node *selected);
 void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int depth);
@@ -322,6 +322,7 @@ void printNodeValue(FILE *fp, const Node *node)
     free(nodeValue);
 }
 
+// offset parameter is relative to start of data, which should be the start of rootNode
 void findColors(const Node *rootNode, const Node *selected, long offset, long length, int *result)
 {
     for (long resultIdx = 0; resultIdx < length; resultIdx++)
@@ -329,10 +330,13 @@ void findColors(const Node *rootNode, const Node *selected, long offset, long le
         result[resultIdx] = NONE;
     }
 
-    findColorsRecur(rootNode, selected, offset, length, result);
+    findColorsRecur(rootNode, 0L, selected, offset, length, result);
 }
 
-void findColorsRecur(const Node *rootNode, const Node *selected, long offset, long length, int *result)
+// offset parameter is relative to start of data
+// segment offset is relative to the start of the parent node, which is called rootNode here
+// rootOffset parameter is the start of the rootNode relative to start of data
+void findColorsRecur(const Node *rootNode, long rootOffset, const Node *selected, long offset, long length, int *result)
 {
     for (long resultIdx = 0; resultIdx < length; resultIdx++)
     {
@@ -353,13 +357,13 @@ void findColorsRecur(const Node *rootNode, const Node *selected, long offset, lo
         {
             Segment segment = childNode->segments[segmentIdx];
 
-            if (segment.offset < offset + length && segment.offset + segment.length > offset)
+            if (rootOffset + segment.offset < offset + length && rootOffset + segment.offset + segment.length > offset)
             {
                 // TODO: Clean this up so it's actually understandable
-                long startIdx = (segment.offset < offset) ? 0 : segment.offset - offset;
-                long endIdx = (segment.offset + segment.length > offset + length) ? length : segment.offset + segment.length - offset;
+                long startIdx = (rootOffset + segment.offset < offset) ? 0 : rootOffset + segment.offset - offset;
+                long endIdx = (rootOffset + segment.offset + segment.length > offset + length) ? length : rootOffset + segment.offset + segment.length - offset;
 
-                findColorsRecur(childNode, selected, startIdx + offset, endIdx - startIdx, &result[startIdx]);
+                findColorsRecur(childNode, rootOffset + segment.offset, selected, startIdx + offset, endIdx - startIdx, &result[startIdx]);
             }
         }
 
