@@ -136,7 +136,7 @@ DataNode::DataNode(Node* node, IByteAccessor* accessor) : node(node), accessor(a
     while (child)
     {
         IByteAccessor* childAccessor = getAccessorForChildNode(child);
-        DataNode* dataChild = new DataNode(child, accessor);
+        DataNode* dataChild = new DataNode(child, childAccessor);
 
         if (prevDataChild == NULL)
         {
