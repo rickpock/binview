@@ -307,17 +307,21 @@ void printNodeValue(FILE *fp, const Node *node)
 {
     unsigned char *nodeValue = readNodeValue(fp, node);
 
-    MemoryIterator valueItr = MemoryIterator(nodeValue, node->segments[0].length);
+    //MemoryIterator valueItr = MemoryIterator(nodeValue, node->segments[0].length);
+    fprintf(stderr, "Printing value for node %s\n", node->description);
+    IByteIterator *valueItr = node->dataNode->accessor->iterator();
 
     if (node->pInterpretation != NULL)
     {
-        printf("%s", node->pInterpretation->format(valueItr, LOCALE_EN_US).c_str());
+        printf("%s", node->pInterpretation->format(*valueItr, LOCALE_EN_US).c_str());
     } else {
         if ((node->displayType & DT_CATEGORY) == DT_NODE)
         {
+	    printf("Node category");
             printNodeValue(fp, (Node *)node->displayInfo);
         }
     }
+    free(valueItr);
 
     free(nodeValue);
 }

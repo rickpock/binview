@@ -4,9 +4,16 @@
 
 #include <stdio.h>
 
-Node::Node(const char *description, long offset, long length, int displayType)
+// offset is relative to the start of the parent Node
+Node::Node(const char *description, long offset, long length, int displayType) : dataNode(NULL)
 {
     this->init(description, (Segment[]){{.offset = offset, .length = length}}, 1, (DisplayType)displayType);
+}
+
+// offset is relative to the start of the parent Node
+Node::Node(const char *description, long offset, long length, Interpretation* pInterpretation) : dataNode(NULL)
+{
+    this->init(description, (Segment[]){{.offset = offset, .length = length}}, 1, pInterpretation);
 }
 
 // SCAFFOLDING CODE
@@ -131,6 +138,8 @@ IByteAccessor* DataNode::getAccessorForChildNode(Node* node)
 
 DataNode::DataNode(Node* node, IByteAccessor* accessor) : node(node), accessor(accessor)
 {
+    node->dataNode = this;
+
     Node* child = node->firstChild;
     DataNode* prevDataChild = NULL;
     while (child)

@@ -87,12 +87,12 @@ public:
 class NodeInterpretation : public Interpretation
 {
 public:
-    NodeInterpretation(DataNode* node);
+    NodeInterpretation(Node* node);
 
     string format(IByteIterator&, Locale);
 
 private:
-    DataNode* node;
+    Node* node;
 };
 
 #endif

@@ -79,6 +79,8 @@ public:
     Segment *segments;
     int segmentCnt;
 
+    DataNode *dataNode;
+
     Interpretation* pInterpretation;
     DisplayType displayType;
     // A variant holding additional info, depending on displayType
@@ -95,6 +97,7 @@ public:
     Node *prevSibling;
 
     Node(const char *description, long offset, long length, int displayType);
+    Node(const char *description, long offset, long length, Interpretation* interpretation);
 private:
     void init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);
     void init(const char *description, Segment *segments, int segmentCnt, Interpretation* interpretation);

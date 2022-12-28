@@ -211,12 +211,12 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
     return out;
 }
 
-NodeInterpretation::NodeInterpretation(DataNode* node) : node(node) {}
+NodeInterpretation::NodeInterpretation(Node* node) : node(node) {}
 
 string NodeInterpretation::format(IByteIterator& data, Locale locale)
 {
-    Interpretation* nodeInterpretation = node->node->pInterpretation;
-    IByteIterator* itr = node->accessor->iterator();
+    Interpretation* nodeInterpretation = node->pInterpretation;
+    IByteIterator* itr = node->dataNode->accessor->iterator();
 
     return nodeInterpretation->format(*itr, locale);
 }

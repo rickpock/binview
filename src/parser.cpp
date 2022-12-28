@@ -113,12 +113,12 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
 
     int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
 
-    Node *filenameNode;
-    Node *headerNode = new Node("Local File Header", parentOffset, localFileHeaderLen, DT_NODE);
-    headerNode->displayInfo = (void *)filenameNode;
+    Node *filenameNode = new Node("File name", 0x1E, fileNameLen, DT_ASCII);
+    Node *headerNode = new Node("Local File Header", parentOffset, localFileHeaderLen, new NodeInterpretation(filenameNode));
+    //headerNode->displayInfo = (void *)filenameNode;
     addChildNode(parentNode, headerNode);
-    Node *dataNode = new Node("File Data", parentOffset + localFileHeaderLen, compressedSize, DT_NODE);
-    dataNode->displayInfo = (void *)filenameNode;
+    Node *dataNode = new Node("File Data", parentOffset + localFileHeaderLen, compressedSize, new NodeInterpretation(filenameNode));
+    //dataNode->displayInfo = (void *)filenameNode;
     addChildNode(parentNode, dataNode);
 
     addChildNode(headerNode,
