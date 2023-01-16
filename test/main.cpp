@@ -308,7 +308,6 @@ void printNodeValue(FILE *fp, const Node *node)
     unsigned char *nodeValue = readNodeValue(fp, node);
 
     //MemoryIterator valueItr = MemoryIterator(nodeValue, node->segments[0].length);
-    fprintf(stderr, "Printing value for node %s\n", node->description);
     IByteIterator *valueItr = node->dataNode->accessor->iterator();
 
     if (node->pInterpretation != NULL)
