@@ -96,7 +96,7 @@ public:
     Node *nextSibling;    // Children are a linked list. The first child points to the next.
     Node *prevSibling;
 
-    Node(const char *description, long offset, long length, int displayType);
+    //Node(const char *description, long offset, long length, int displayType);
     Node(const char *description, long offset, long length, Interpretation* interpretation);
 private:
     void init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);

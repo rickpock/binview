@@ -27,7 +27,7 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode);
 Node *parse(FILE *fp)
 {
     // Length will be updated at the end of the function
-    Node *output = new Node("Zip File", 0L, 0L, DT_NONE);
+    Node *output = new Node("Zip File", 0L, 0L, NULL);
 
     char signatureBuffer[4];
 
@@ -68,7 +68,7 @@ Node *parse(FILE *fp)
 
 long readCentralDirectory(FILE *fp, long parentOffset, Node *parentNode)
 {
-    Node *centralDirectory = new Node("Central Directory", parentOffset, 0, DT_NONE);
+    Node *centralDirectory = new Node("Central Directory", parentOffset, 0, NULL);
 
     char signatureBuffer[4];
 
@@ -113,7 +113,7 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
 
     int localFileHeaderLen = 0x1e + fileNameLen + extraFieldLen;
 
-    Node *filenameNode = new Node("File name", 0x1E, fileNameLen, DT_ASCII);
+    Node *filenameNode = new Node("File name", 0x1E, fileNameLen, Interpretation::ascii);
     Node *headerNode = new Node("Local File Header", parentOffset, localFileHeaderLen, new NodeInterpretation(filenameNode));
     //headerNode->displayInfo = (void *)filenameNode;
     addChildNode(parentNode, headerNode);
@@ -122,30 +122,30 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
     addChildNode(parentNode, dataNode);
 
     addChildNode(headerNode,
-        new Node("Signature", 0x0, 0x4, DT_HEX));
+        new Node("Signature", 0x0, 0x4, Interpretation::hex));
     addChildNode(headerNode,
-        new Node("Version", 0x4, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
+        new Node("Version", 0x4, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Flags", 0x6, 0x2, DT_FLAGS));
+        new Node("Flags", 0x6, 0x2, NULL));	// TODO: Flags
     addChildNode(headerNode,
-        new Node("Compression method", 0x8, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
+        new Node("Compression method", 0x8, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("File modification time", 0xA, 0x2, DT_CUSTOM_MSDOS_TIME));
+        new Node("File modification time", 0xA, 0x2, Interpretation::msdosTime));
     addChildNode(headerNode,
-        new Node("File modification date", 0xC, 0x2, DT_CUSTOM_MSDOS_DATE));
+        new Node("File modification date", 0xC, 0x2, Interpretation::msdosDate));
     addChildNode(headerNode,
-        new Node("CRC-32 checksum", 0xE, 0x4, DT_HEX));
+        new Node("CRC-32 checksum", 0xE, 0x4, Interpretation::hex));
     addChildNode(headerNode,
-        new Node("Compressed size", 0x12, 0x4, DT_INT | DT_INT_OPT_INCL_HEX));
+        new Node("Compressed size", 0x12, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Uncompressed size", 0x16, 0x4, DT_INT | DT_INT_OPT_INCL_HEX));
+        new Node("Uncompressed size", 0x16, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("File name length", 0x1A, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
+        new Node("File name length", 0x1A, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Extra field length", 0x1C, 0x2, DT_INT | DT_INT_OPT_INCL_HEX));
+        new Node("Extra field length", 0x1C, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode, filenameNode);
     addChildNode(headerNode,
-        new Node("Extra field", 0x1E + fileNameLen, extraFieldLen, DT_HEX));
+        new Node("Extra field", 0x1E + fileNameLen, extraFieldLen, Interpretation::hex));
 
     fseek(fp, localFileHeaderLen + compressedSize, SEEK_CUR);
 
@@ -164,50 +164,50 @@ long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNod
 
     int centralDirectoryFileHeaderLen = 0x2e + fileNameLen + extraFieldLen + fileCommentLen;
 
-    Node *headerNode = new Node("Central Directory File Header", parentOffset, centralDirectoryFileHeaderLen, DT_NONE);
+    Node *headerNode = new Node("Central Directory File Header", parentOffset, centralDirectoryFileHeaderLen, NULL);
     addChildNode(parentNode, headerNode);
 
     // TODO: Set DisplayTypes
     addChildNode(headerNode,
-        new Node("Signature", 0x0, 0x4, DT_NONE));
+        new Node("Signature", 0x0, 0x4, NULL));
     addChildNode(headerNode,
-        new Node("Version", 0x4, 0x2, DT_NONE));
+        new Node("Version", 0x4, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("Version needed", 0x6, 0x2, DT_NONE));
+        new Node("Version needed", 0x6, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("Flags", 0x8, 0x2, DT_NONE));
+        new Node("Flags", 0x8, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("Compression method", 0xA, 0x2, DT_NONE));
+        new Node("Compression method", 0xA, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("File modification time", 0xC, 0x2, DT_NONE));
+        new Node("File modification time", 0xC, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("File modification date", 0xE, 0x2, DT_NONE));
+        new Node("File modification date", 0xE, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("CRC-32 checksum", 0x10, 0x4, DT_NONE));
+        new Node("CRC-32 checksum", 0x10, 0x4, NULL));
     addChildNode(headerNode,
-        new Node("Compressed size", 0x14, 0x4, DT_NONE));
+        new Node("Compressed size", 0x14, 0x4, NULL));
     addChildNode(headerNode,
-        new Node("Uncompressed size", 0x18, 0x4, DT_NONE));
+        new Node("Uncompressed size", 0x18, 0x4, NULL));
     addChildNode(headerNode,
-        new Node("File name length", 0x1C, 0x2, DT_NONE));
+        new Node("File name length", 0x1C, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("Extra field length", 0x1E, 0x2, DT_NONE));
+        new Node("Extra field length", 0x1E, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("File comment length", 0x20, 0x2, DT_NONE));
+        new Node("File comment length", 0x20, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("Disk # start", 0x22, 0x2, DT_NONE));
+        new Node("Disk # start", 0x22, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("Internal attributes", 0x24, 0x2, DT_NONE));
+        new Node("Internal attributes", 0x24, 0x2, NULL));
     addChildNode(headerNode,
-        new Node("External attributes", 0x26, 0x4, DT_NONE));
+        new Node("External attributes", 0x26, 0x4, NULL));
     addChildNode(headerNode,
-        new Node("Offset of local header", 0x2A, 0x4, DT_NONE));
+        new Node("Offset of local header", 0x2A, 0x4, NULL));
     addChildNode(headerNode,
-        new Node("File name", 0x2E, fileNameLen, DT_NONE));
+        new Node("File name", 0x2E, fileNameLen, NULL));
     addChildNode(headerNode,
-        new Node("Extra field", 0x2E + fileNameLen, extraFieldLen, DT_NONE));
+        new Node("Extra field", 0x2E + fileNameLen, extraFieldLen, NULL));
     addChildNode(headerNode,
-        new Node("File comment", 0x2E + fileNameLen + extraFieldLen, fileCommentLen, DT_NONE));
+        new Node("File comment", 0x2E + fileNameLen + extraFieldLen, fileCommentLen, NULL));
 
     fseek(fp, centralDirectoryFileHeaderLen, SEEK_CUR);
 
@@ -221,7 +221,7 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long parentOffset, Node *parentNo
     peekRelative(fp, 0x14, 2, (char *)&commentLen);    // TODO: Error checking
 
     int endOfCentralDirectoryRecordLen = 0x16 + commentLen;
-    Node *eocdrNode = new Node("End of Central Directory Record", parentOffset, endOfCentralDirectoryRecordLen, DT_NONE);
+    Node *eocdrNode = new Node("End of Central Directory Record", parentOffset, endOfCentralDirectoryRecordLen, NULL);
     addChildNode(parentNode, eocdrNode);
     fseek(fp, endOfCentralDirectoryRecordLen, SEEK_CUR);
 

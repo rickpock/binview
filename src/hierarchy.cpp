@@ -5,10 +5,10 @@
 #include <stdio.h>
 
 // offset is relative to the start of the parent Node
-Node::Node(const char *description, long offset, long length, int displayType) : dataNode(NULL)
-{
-    this->init(description, (Segment[]){{.offset = offset, .length = length}}, 1, (DisplayType)displayType);
-}
+//Node::Node(const char *description, long offset, long length, int displayType) : dataNode(NULL)
+//{
+//    this->init(description, (Segment[]){{.offset = offset, .length = length}}, 1, (DisplayType)displayType);
+//}
 
 // offset is relative to the start of the parent Node
 Node::Node(const char *description, long offset, long length, Interpretation* pInterpretation) : dataNode(NULL)
