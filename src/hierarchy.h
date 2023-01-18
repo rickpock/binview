@@ -82,11 +82,6 @@ public:
     DataNode *dataNode;
 
     Interpretation* pInterpretation;
-    DisplayType displayType;
-    // A variant holding additional info, depending on displayType
-    // * For DT_NODE, displayInfo is a Node*
-    // * For DT_FLAGS, displayInfo is a DisplayInfoFlags*
-    void *displayInfo;  // If displayType is DT_NODE, displayInfo is a Node*
 
     Node *firstChild;
     Node *lastChild;
@@ -96,10 +91,8 @@ public:
     Node *nextSibling;    // Children are a linked list. The first child points to the next.
     Node *prevSibling;
 
-    //Node(const char *description, long offset, long length, int displayType);
     Node(const char *description, long offset, long length, Interpretation* interpretation);
 private:
-    void init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType);
     void init(const char *description, Segment *segments, int segmentCnt, Interpretation* interpretation);
 };
 

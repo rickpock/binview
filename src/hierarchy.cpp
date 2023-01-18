@@ -5,54 +5,10 @@
 #include <stdio.h>
 
 // offset is relative to the start of the parent Node
-//Node::Node(const char *description, long offset, long length, int displayType) : dataNode(NULL)
-//{
-//    this->init(description, (Segment[]){{.offset = offset, .length = length}}, 1, (DisplayType)displayType);
-//}
-
-// offset is relative to the start of the parent Node
 Node::Node(const char *description, long offset, long length, Interpretation* pInterpretation) : dataNode(NULL)
 {
     this->init(description, (Segment[]){{.offset = offset, .length = length}}, 1, pInterpretation);
 }
-
-// SCAFFOLDING CODE
-// TODO: Remove when pInterpretation is set directly
-void Node::init(const char *description, Segment *segments, int segmentCnt, DisplayType displayType)
-{
-    Interpretation* pInterpretation = NULL;
-
-    if (displayType == DT_ASCIZ)
-    {
-        pInterpretation = Interpretation::asciz;
-    } else if (displayType == DT_ASCII)
-    {
-        pInterpretation = Interpretation::ascii;
-    } else if (displayType == DT_HEX)
-    {
-        pInterpretation = Interpretation::hex;
-    } else if ((displayType & DT_CATEGORY) == DT_INT)
-    {
-        int opts = 0;
-        if ((displayType & DT_INT_OPT_BIGENDIAN) == DT_INT_OPT_BIGENDIAN)
-        { opts |= IntInterpretation::OPT_BIG_ENDIAN; }
-        if ((displayType & DT_INT_OPT_INCL_HEX) != DT_INT_OPT_INCL_HEX)
-        { opts |= IntInterpretation::OPT_EXCL_HEX; }
-
-        pInterpretation = new IntInterpretation(opts);
-    } else if ((displayType & DT_CUSTOM_MSDOS_DATE) == DT_CUSTOM_MSDOS_DATE)
-    {
-        pInterpretation = Interpretation::msdosDate;
-    } else if ((displayType & DT_CUSTOM_MSDOS_TIME) == DT_CUSTOM_MSDOS_TIME)
-    {
-        pInterpretation = Interpretation::msdosTime;
-    } else {
-        pInterpretation = NULL;
-    }
-
-    init(description, segments, segmentCnt, pInterpretation);
-}
-// END OF SCAFFOLDING CODE
 
 void Node::init(const char *description, Segment *segments, int segmentCnt, Interpretation* pInterpretation)
 {
@@ -71,12 +27,6 @@ void Node::init(const char *description, Segment *segments, int segmentCnt, Inte
 
     printf("%s: %X\n", description,pInterpretation);
     this->pInterpretation = pInterpretation;
-
-    // SCAFFOLDING CODE
-    // TODO: Remove when pInterpretation is set directly
-    this->displayType = DT_NONE;
-    this->displayInfo = NULL;
-    // END OF SCAFFOLDING CODE
     
     this->firstChild = NULL;
     this->lastChild = NULL;

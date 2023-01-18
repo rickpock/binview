@@ -313,12 +313,6 @@ void printNodeValue(FILE *fp, const Node *node)
     if (node->pInterpretation != NULL)
     {
         printf("%s", node->pInterpretation->format(*valueItr, LOCALE_EN_US).c_str());
-    } else {
-        if ((node->displayType & DT_CATEGORY) == DT_NODE)
-        {
-	    printf("Node category");
-            printNodeValue(fp, (Node *)node->displayInfo);
-        }
     }
     free(valueItr);
 

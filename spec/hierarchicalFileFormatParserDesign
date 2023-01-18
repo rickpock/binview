@@ -63,3 +63,6 @@ MatchRule : Rule
   Path path
   Condition cond
   long const // TODO: Change for arbitrary length -- Determine length by field size?
+
+enum Condition
+  equals, notEquals, lessThan, lessThanOrEqualTo, greaterThan, greaterThanOrEqualTo
