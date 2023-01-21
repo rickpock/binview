@@ -221,6 +221,63 @@ string NodeInterpretation::format(IByteIterator& data, Locale locale)
     return nodeInterpretation->format(*itr, locale);
 }
 
+FlagsInterpretation::FlagsInterpretation(initializer_list<Flag> flags) : flags(flags) {}
+
+string FlagsInterpretation::format(IByteIterator& data, Locale locale)
+{
+    // TODO
+    // WARNING: Assumes a flag has 32 bits maximum
+    // TODO: Don't assume 'long' == 32 bits
+    unsigned long buffer = 0;
+    byte* pBuffer = (byte*)&buffer;
+    unsigned int totalNumBits = 0;
+    for (unsigned int bufferIdx = 0; data.hasNext(); bufferIdx++)
+    {
+        pBuffer[bufferIdx] = data.next();
+        totalNumBits += 8;
+    }
+
+    string out = "";
+
+    unsigned int startBitIdx = totalNumBits - 1;
+    for (vector<Flag>::iterator iter = flags.begin(); iter < flags.end(); iter++)
+    //for (unsigned int flagIdx = 0; flagIdx < flagsLen; flagIdx++)
+    {
+        unsigned int numBits = iter->getNumBits();
+        //unsigned int numBits = flags[flagIdx].getNumBits();
+
+        // TODO: Confirm we're doing big-endian vs little-endian correctly
+        unsigned long value = (buffer >> (startBitIdx - numBits + 1)) & ((0x1 << numBits) - 1);
+        for (unsigned int bitIdx = startBitIdx; bitIdx > startBitIdx - numBits; bitIdx--)
+        {
+          if (((buffer >> bitIdx) & 0x1) == 0x1)
+          { out += "1"; }
+          else
+          { out += "0"; }
+        }
+        out += " (";
+        out += iter->getInterpretation(value);
+        //out += flags[flagIdx].getInterpretation(value);
+        out += ") ";
+
+        startBitIdx -= numBits;
+    }
+
+    return out;
+}
+
+Flag::Flag(unsigned int numBits, initializer_list<string> flagValues): numBits(numBits), flagValues(flagValues) {}
+
+unsigned int Flag::getNumBits()
+{
+    return numBits;
+}
+
+string Flag::getInterpretation(unsigned int value)
+{
+    return flagValues.at(value);
+}
+
 Interpretation* Interpretation::asciz = new AscizInterpretation();
 Interpretation* Interpretation::ascii = new AsciiInterpretation();
 Interpretation* Interpretation::hex = new HexInterpretation();

@@ -2,6 +2,8 @@
 #define BINVIEW_INTERPRETATION
 
 #include <string>
+#include <vector>
+#include <initializer_list>
 #include "byteIterator.h"
 
 class Interpretation;
@@ -84,6 +86,8 @@ public:
     string format(IByteIterator&, Locale);
 };
 
+class Flag;
+
 class NodeInterpretation : public Interpretation
 {
 public:
@@ -93,6 +97,31 @@ public:
 
 private:
     Node* node;
+};
+
+class FlagsInterpretation : public Interpretation
+{
+public:
+    FlagsInterpretation(initializer_list<Flag> flags);
+
+    string format(IByteIterator&, Locale);
+
+private:
+    vector<Flag> flags;
+};
+
+class Flag
+{
+public:
+    // TODO: Use different term than "interpretation", which is already used to mean something else
+    Flag(unsigned int numBits, initializer_list<string> flagValues);
+
+    unsigned int getNumBits();
+    string getInterpretation(unsigned int value);
+
+private:
+    unsigned int numBits;
+    vector<string> flagValues;
 };
 
 #endif
