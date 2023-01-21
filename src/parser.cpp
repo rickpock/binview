@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 /*
  * Read up to n characters into *out, or until EOF
@@ -103,9 +104,9 @@ long readCentralDirectory(FILE *fp, long parentOffset, Node *parentNode)
 
 long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
 {
-    short fileNameLen;
-    short extraFieldLen;
-    long compressedSize;
+    uint16_t fileNameLen;
+    uint16_t extraFieldLen;
+    uint32_t compressedSize;
 
     peekRelative(fp, 0x1a, 2, (char *)&fileNameLen);    // TODO: Error checking
     peekRelative(fp, 0x1c, 2, (char *)&extraFieldLen);    // TODO: Error checking
@@ -152,9 +153,9 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
 
 long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNode)
 {
-    short fileNameLen;
-    short extraFieldLen;
-    short fileCommentLen;
+    uint16_t fileNameLen;
+    uint16_t extraFieldLen;
+    uint16_t fileCommentLen;
 
     peekRelative(fp, 0x1c, 2, (char *)&fileNameLen);    // TODO: Error checking
     peekRelative(fp, 0x1e, 2, (char *)&extraFieldLen);    // TODO: Error checking
@@ -214,7 +215,7 @@ long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNod
 
 long readEndOfCentralDirectoryRecord(FILE *fp, long parentOffset, Node *parentNode)
 {
-    short commentLen;
+    uint16_t commentLen;
 
     peekRelative(fp, 0x14, 2, (char *)&commentLen);    // TODO: Error checking
 
