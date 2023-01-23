@@ -241,10 +241,8 @@ string FlagsInterpretation::format(IByteIterator& data, Locale locale)
 
     int startBitIdx = totalNumBits - 1;
     for (vector<Flag>::iterator iter = flags.begin(); iter < flags.end(); iter++)
-    //for (unsigned int flagIdx = 0; flagIdx < flagsLen; flagIdx++)
     {
-        unsigned int numBits = iter->getNumBits();
-        //unsigned int numBits = flags[flagIdx].getNumBits();
+        int numBits = iter->getNumBits();
 
         // TODO: Confirm we're doing big-endian vs little-endian correctly
         unsigned long value = (buffer >> (startBitIdx - numBits + 1)) & ((0x1 << numBits) - 1);
@@ -257,7 +255,6 @@ string FlagsInterpretation::format(IByteIterator& data, Locale locale)
         }
         out += " (";
         out += iter->getInterpretation(value);
-        //out += flags[flagIdx].getInterpretation(value);
         out += ") ";
 
         startBitIdx -= numBits;
