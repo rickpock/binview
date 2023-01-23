@@ -115,6 +115,7 @@ class Flag
 public:
     // TODO: Use different term than "interpretation", which is already used to mean something else
     Flag(unsigned int numBits, initializer_list<string> flagValues);
+    Flag(unsigned int numBits, string flagValue); // Sets all bit sequences to the same meaning -- commonly used for "unused" or "reserved" bits
 
     unsigned int getNumBits();
     string getInterpretation(unsigned int value);
