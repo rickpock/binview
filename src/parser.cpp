@@ -124,8 +124,21 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
         new Node("Signature", 0x0, 0x4, Interpretation::hex));
     addChildNode(headerNode,
         new Node("Version", 0x4, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
-    addChildNode(headerNode, // TODO: Bits 1 and 2 are specifc to compression method 6. This needs to be changed to use a ConditionInterpretation
-        new Node("Flags", 0x6, 0x2, new FlagsInterpretation{
+    FlagsInterpretation* pDefaultFlagsInterp = new FlagsInterpretation{
+            Flag(1, {"unencrypted", "encrypted"}), // bit 0
+            Flag(2, "undefined"), // bits 1-2
+            Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
+            Flag(1, "reserved"), // bit 4
+            Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
+            Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
+            Flag(4, "unused"), // bits 7-10
+            Flag(1, {"", "UTF-8 field encoding"}), // bit 11
+            Flag(1, "reserved"), // bit 12
+            Flag(1, {"", "Local Header fields masked"}), // bit 13
+            Flag(1, "reserved"), // bit 14
+            Flag(1, "reserved") // bit 15
+        };
+    FlagsInterpretation* pMethod6FlagsInterp = new FlagsInterpretation{
             Flag(1, {"unencrypted", "encrypted"}), // bit 0
             Flag(1, {"4K sliding dict", "8k sliding dict"}), // bit 1
             Flag(1, {"2 Shannon-Fano trees", "3 Shannon-Fano trees"}), // bit 2
@@ -139,9 +152,46 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
             Flag(1, {"", "Local Header fields masked"}), // bit 13
             Flag(1, "reserved"), // bit 14
             Flag(1, "reserved") // bit 15
-        }));
+        };
+    FlagsInterpretation* pMethod89FlagsInterp = new FlagsInterpretation{
+            Flag(1, {"unencrypted", "encrypted"}), // bit 0
+            Flag(2, {"normal compression", "maximum compression", "fast compression", "super fast compression"}), // bits 1-2
+            Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
+            Flag(1, "reserved"), // bit 4
+            Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
+            Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
+            Flag(4, "unused"), // bits 7-10
+            Flag(1, {"", "UTF-8 field encoding"}), // bit 11
+            Flag(1, "reserved"), // bit 12
+            Flag(1, {"", "Local Header fields masked"}), // bit 13
+            Flag(1, "reserved"), // bit 14
+            Flag(1, "reserved") // bit 15
+        };
+    FlagsInterpretation* pMethod14FlagsInterp = new FlagsInterpretation{
+            Flag(1, {"unencrypted", "encrypted"}), // bit 0
+            Flag(1, {"no EOS marker", "EOS marker used"}), // bit 1
+            Flag(1, "undefined"), // bit 2
+            Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
+            Flag(1, "reserved"), // bit 4
+            Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
+            Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
+            Flag(4, "unused"), // bits 7-10
+            Flag(1, {"", "UTF-8 field encoding"}), // bit 11
+            Flag(1, "reserved"), // bit 12
+            Flag(1, {"", "Local Header fields masked"}), // bit 13
+            Flag(1, "reserved"), // bit 14
+            Flag(1, "reserved") // bit 15
+        };
+    Node *compressionNode = new Node("Compression method", 0x8, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN));
+    addChildNode(headerNode, // TODO: Bits 1 and 2 are specifc to compression method 6. This needs to be changed to use a ConditionInterpretation
+        new Node("Flags", 0x6, 0x2, new ConditionalInterpretation(compressionNode, pDefaultFlagsInterp, {
+            Condition(6, pMethod6FlagsInterp),
+            Condition(8, pMethod89FlagsInterp),
+            Condition(9, pMethod89FlagsInterp),
+            Condition(14, pMethod14FlagsInterp)
+        })));
     addChildNode(headerNode,
-        new Node("Compression method", 0x8, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+        compressionNode);
     addChildNode(headerNode,
         new Node("File modification time", 0xA, 0x2, Interpretation::msdosTime));
     addChildNode(headerNode,

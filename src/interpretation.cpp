@@ -81,6 +81,79 @@ bool IntInterpretation::isSystemLittleEndian()
     return *(char *)&test;
 }
 
+// TODO: Rewrite IntInterpretation::format to use this method
+// TODO: Switch to inttypes.h data type
+unsigned long IntInterpretation::readAsLong(IByteIterator& data, int opts)
+{
+    unsigned long value = 0;
+
+    // Read source from least-significant byte to most significant byte
+    if ((opts & OPT_MASK_ENDIAN) == OPT_LITTLE_ENDIAN)
+    {
+        // Interpret data as Little Endian
+        if (isSystemLittleEndian())
+        {
+            // Read source from left to right
+            // Write into the long from left to right
+            int longIdx = 0;
+            while (data.hasNext() && longIdx < sizeof(unsigned long))
+            {
+                ((char *)&value)[longIdx] = data.next();
+                longIdx++;
+            }
+        } else {
+            // Read source from left to right
+            // Write into the long from right to left
+            int longIdx = sizeof(unsigned long);
+            while (data.hasNext() && longIdx >= 0)
+            {
+                ((char *)&value)[longIdx] = data.next();
+                longIdx--;
+            }
+        }
+	
+    } else {
+        // Interpret data as Big Endian
+
+        // Read source from right to left
+        byte buffer[sizeof(unsigned long)];
+        for (int bufferIdx = 0; bufferIdx < sizeof(unsigned long); bufferIdx++)
+        {
+            buffer[bufferIdx] = 0;
+        }
+
+        int bufferIdx = 0;
+        while (data.hasNext())
+        {
+            buffer[bufferIdx] = data.next();
+            bufferIdx = (bufferIdx + 1) % sizeof(unsigned long);
+        }
+
+        if (isSystemLittleEndian())
+        {
+            // Write into the long from left to right
+            for (int longIdx = 0; longIdx < sizeof(unsigned long); longIdx++)
+            {
+                // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
+                bufferIdx = (bufferIdx - 1 + sizeof(unsigned long)) % sizeof(unsigned long);
+
+                ((char *)&value)[longIdx] = buffer[bufferIdx];
+            }
+        } else {
+            // Write into the long from right to left
+            for (int longIdx = sizeof(unsigned long); longIdx > 0; longIdx--)
+            {
+                // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
+                bufferIdx = (bufferIdx - 1 + sizeof(unsigned long)) % sizeof(unsigned long);
+
+                ((char *)&value)[longIdx] = buffer[bufferIdx];
+            }
+        }
+    }
+
+    return value;
+}
+
 // TODO
 // WARNING: This interpretation only works up to "long" size
 string IntInterpretation::format(IByteIterator& data, Locale locale)
@@ -278,6 +351,38 @@ unsigned int Flag::getNumBits()
 string Flag::getInterpretation(unsigned int value)
 {
     return flagValues.at(value);
+}
+
+ConditionalInterpretation::ConditionalInterpretation(Node* node, Interpretation* pDefault, initializer_list<Condition> conditions): node(node), pDefault(pDefault), conditions(conditions) {}
+
+string ConditionalInterpretation::format(IByteIterator& data, Locale locale)
+{
+    IByteIterator* itr = node->dataNode->accessor->iterator();
+
+    unsigned long nodeValue = IntInterpretation::readAsLong(*itr, IntInterpretation::OPT_LITTLE_ENDIAN);
+
+    // TODO: Rewrite using std::find_if
+    for (vector<Condition>::iterator condIter = conditions.begin(); condIter < conditions.end(); condIter++)
+    {
+        if (condIter->getValueMatch() == nodeValue)
+        {
+            return condIter->getpInterpretation()->format(data, locale);
+        }
+    }
+
+    return pDefault->format(data, locale);
+}
+
+Condition::Condition(unsigned int valueMatch, Interpretation* pInterpretation): valueMatch(valueMatch), pInterpretation(pInterpretation) {}
+
+unsigned int Condition::getValueMatch()
+{
+    return valueMatch;
+}
+
+Interpretation* Condition::getpInterpretation()
+{
+    return pInterpretation;
 }
 
 Interpretation* Interpretation::asciz = new AscizInterpretation();

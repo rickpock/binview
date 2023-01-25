@@ -68,6 +68,8 @@ public:
 
     IntInterpretation(int opts);
 
+    static unsigned long readAsLong(IByteIterator&, int opts);
+
 private:
     int opts;
 
@@ -123,6 +125,35 @@ public:
 private:
     unsigned int numBits;
     vector<string> flagValues;
+};
+
+class Condition;
+
+// Allows for one of several interpretations to be selected based on the value of another node
+class ConditionalInterpretation : public Interpretation
+{
+public:
+    ConditionalInterpretation(Node* node, Interpretation* pDefault, initializer_list<Condition> conditions);
+
+    string format(IByteIterator&, Locale);
+
+private:
+    Node* node;
+    Interpretation* pDefault;
+    vector<Condition> conditions;
+};
+
+class Condition
+{
+public:
+    Condition(unsigned int valueMatch, Interpretation* pInterpretation);
+
+    unsigned int getValueMatch();
+    Interpretation* getpInterpretation();
+
+private:
+    unsigned int valueMatch;
+    Interpretation* pInterpretation;
 };
 
 #endif
