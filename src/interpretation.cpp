@@ -39,16 +39,16 @@ string MsdosDateInterpretation::format(IByteIterator& data, Locale Locale)
     union
     {
         byte buffer[2] = {0, 0};
-        unsigned short value;
+        uint16_t value;
     };
     if (data.hasNext())
     { buffer[0] = data.next(); }
     if (data.hasNext())
     { buffer[1] = data.next(); }
 
-    unsigned short year = 1980 + ((value >> 9) & ((1 << 7) - 1));
-    unsigned short month = (value >> 5) & ((1 << 4) - 1);
-    unsigned short day = value & ((1 << 5) - 1);
+    uint16_t year = 1980 + ((value >> 9) & ((1 << 7) - 1));
+    uint16_t month = (value >> 5) & ((1 << 4) - 1);
+    uint16_t day = value & ((1 << 5) - 1);
 
     return std::to_string(month) + "/" + std::to_string(day) + "/" + std::to_string(year);
 }
@@ -59,16 +59,16 @@ string MsdosTimeInterpretation::format(IByteIterator& data, Locale Locale)
     union
     {
         byte buffer[2];
-        unsigned short value;
+        uint16_t value;
     };
     if (data.hasNext())
     { buffer[0] = data.next(); }
     if (data.hasNext())
     { buffer[1] = data.next(); }
 
-    unsigned short hour = (value >> 11) & ((1 << 5) - 1);
-    unsigned short minute = (value >> 5) & ((1 << 6) - 1);
-    unsigned short second = (value & ((1 << 5) - 1)) * 2;
+    uint16_t hour = (value >> 11) & ((1 << 5) - 1);
+    uint16_t minute = (value >> 5) & ((1 << 6) - 1);
+    uint16_t second = (value & ((1 << 5) - 1)) * 2;
 
     return std::to_string(hour) + ":" + std::to_string(minute) + ":" + std::to_string(second);
 }
@@ -93,7 +93,7 @@ uint64_t IntInterpretation::readAs64Bits(IByteIterator& data, int opts)
         if (isSystemLittleEndian())
         {
             // Read source from left to right
-            // Write into the long from left to right
+            // Write into the data structure from left to right
             int valueIdx = 0;
             while (data.hasNext() && valueIdx < sizeof(uint64_t))
             {
@@ -102,7 +102,7 @@ uint64_t IntInterpretation::readAs64Bits(IByteIterator& data, int opts)
             }
         } else {
             // Read source from left to right
-            // Write into the long from right to left
+            // Write into the data structure from right to left
             int valueIdx = sizeof(uint64_t);
             while (data.hasNext() && valueIdx >= 0)
             {
@@ -130,7 +130,7 @@ uint64_t IntInterpretation::readAs64Bits(IByteIterator& data, int opts)
 
         if (isSystemLittleEndian())
         {
-            // Write into the long from left to right
+            // Write into the data structure from left to right
             for (int valueIdx = 0; valueIdx < sizeof(uint64_t); valueIdx++)
             {
                 // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
@@ -139,7 +139,7 @@ uint64_t IntInterpretation::readAs64Bits(IByteIterator& data, int opts)
                 ((byte *)&value)[valueIdx] = buffer[bufferIdx];
             }
         } else {
-            // Write into the long from right to left
+            // Write into the data structure from right to left
             for (int valueIdx = sizeof(uint64_t); valueIdx > 0; valueIdx--)
             {
                 // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
@@ -154,7 +154,7 @@ uint64_t IntInterpretation::readAs64Bits(IByteIterator& data, int opts)
 }
 
 // TODO
-// WARNING: This interpretation only works up to "long" size
+// WARNING: This interpretation only works up to 64 bits
 string IntInterpretation::format(IByteIterator& data, Locale locale)
 {
     string out = "";
@@ -172,8 +172,8 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
         // Print hex right to left when little endian
         if ((opts & OPT_MASK_HEX) == OPT_INCL_HEX)
         {
-            byte buffer[sizeof(unsigned long)];
-            for (int bufferIdx = 0; bufferIdx < sizeof(unsigned long); bufferIdx++)
+            byte buffer[sizeof(uint16_t)];
+            for (int bufferIdx = 0; bufferIdx < sizeof(uint64_t); bufferIdx++)
             {
                 buffer[bufferIdx] = 0;
             }
@@ -185,17 +185,17 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
             while (data.hasNext())
             {
                 buffer[bufferIdx] = data.next();
-                bufferIdx = (bufferIdx + 1) % sizeof(unsigned long);
+                bufferIdx = (bufferIdx + 1) % sizeof(uint64_t);
                 dataLen++;
             }
 
             out = out + " (0x";
     
             char charBuffer[3];
-            for (int longIdx = 0; longIdx < sizeof(unsigned long) && longIdx < dataLen; longIdx++)
+            for (int dataIdx = 0; dataIdx < sizeof(uint64_t) && dataIdx < dataLen; dataIdx++)
             {
                 // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
-                bufferIdx = (bufferIdx - 1 + sizeof(unsigned long)) % sizeof(unsigned long);
+                bufferIdx = (bufferIdx - 1 + sizeof(uint64_t)) % sizeof(uint64_t);
 
                 sprintf(charBuffer, "%02X", buffer[bufferIdx]);
                 out += charBuffer;
@@ -242,12 +242,10 @@ FlagsInterpretation::FlagsInterpretation(initializer_list<Flag> flags) : flags(f
 
 string FlagsInterpretation::format(IByteIterator& data, Locale locale)
 {
-    // TODO
-    // WARNING: Assumes a flag has 32 bits maximum
-    // TODO: Don't assume 'long' == 32 bits
-    unsigned long buffer = 0;
+    // WARNING: Assumes a flag has 64 bits maximum
+    uint64_t buffer = 0;
     byte* pBuffer = (byte*)&buffer;
-    unsigned int totalNumBits = 0;
+    uint8_t totalNumBits = 0;
     for (unsigned int bufferIdx = 0; data.hasNext(); bufferIdx++)
     {
         pBuffer[bufferIdx] = data.next();
@@ -256,14 +254,14 @@ string FlagsInterpretation::format(IByteIterator& data, Locale locale)
 
     string out = "";
 
-    int startBitIdx = totalNumBits - 1;
+    int8_t startBitIdx = totalNumBits - 1;
     for (vector<Flag>::iterator iter = flags.begin(); iter < flags.end(); iter++)
     {
-        int numBits = iter->getNumBits();
+        int8_t numBits = iter->getNumBits();
 
         // TODO: Confirm we're doing big-endian vs little-endian correctly
-        unsigned long value = (buffer >> (startBitIdx - numBits + 1)) & ((0x1 << numBits) - 1);
-        for (int bitIdx = startBitIdx; bitIdx > startBitIdx - numBits; bitIdx--)
+        uint64_t value = (buffer >> (startBitIdx - numBits + 1)) & ((0x1 << numBits) - 1);
+        for (int8_t bitIdx = startBitIdx; bitIdx > startBitIdx - numBits; bitIdx--)
         {
           if (((buffer >> bitIdx) & 0x1) == 0x1)
           { out += "1"; }
@@ -280,14 +278,14 @@ string FlagsInterpretation::format(IByteIterator& data, Locale locale)
     return out;
 }
 
-Flag::Flag(unsigned int numBits, initializer_list<string> flagValues): numBits(numBits), flagValues(flagValues) {}
+Flag::Flag(uint8_t numBits, initializer_list<string> flagValues): numBits(numBits), flagValues(flagValues) {}
 
-Flag::Flag(unsigned int numBits, string flagValue): numBits(numBits)
+Flag::Flag(uint8_t numBits, string flagValue): numBits(numBits)
 {
     flagValues = vector<string>(1 << numBits, flagValue);
 }
 
-unsigned int Flag::getNumBits()
+uint8_t Flag::getNumBits()
 {
     return numBits;
 }
@@ -305,7 +303,6 @@ string ConditionalInterpretation::format(IByteIterator& data, Locale locale)
 
     uint64_t nodeValue = IntInterpretation::readAs64Bits(*itr, IntInterpretation::OPT_LITTLE_ENDIAN);
 
-    // TODO: Rewrite using std::find_if
     for (vector<Condition>::iterator condIter = conditions.begin(); condIter < conditions.end(); condIter++)
     {
         if (condIter->getValueMatch() == nodeValue)
