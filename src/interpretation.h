@@ -5,6 +5,7 @@
 #include <vector>
 #include <initializer_list>
 #include "byteIterator.h"
+#include <inttypes.h>
 
 class Interpretation;
 
@@ -48,7 +49,7 @@ public:
 };
 
 // TODO
-// WARNING: This interpretation only works up to "long" size
+// WARNING: This interpretation only works up to 64 bits
 class IntInterpretation : public Interpretation
 {
 public:
@@ -68,7 +69,7 @@ public:
 
     IntInterpretation(int opts);
 
-    static unsigned long readAsLong(IByteIterator&, int opts);
+    static uint64_t readAs64Bits(IByteIterator&, int opts);
 
 private:
     int opts;
@@ -146,13 +147,13 @@ private:
 class Condition
 {
 public:
-    Condition(unsigned int valueMatch, Interpretation* pInterpretation);
+    Condition(uint64_t valueMatch, Interpretation* pInterpretation);
 
-    unsigned int getValueMatch();
+    uint64_t getValueMatch();
     Interpretation* getpInterpretation();
 
 private:
-    unsigned int valueMatch;
+    uint64_t valueMatch;
     Interpretation* pInterpretation;
 };
 

@@ -81,11 +81,10 @@ bool IntInterpretation::isSystemLittleEndian()
     return *(char *)&test;
 }
 
-// TODO: Rewrite IntInterpretation::format to use this method
 // TODO: Switch to inttypes.h data type
-unsigned long IntInterpretation::readAsLong(IByteIterator& data, int opts)
+uint64_t IntInterpretation::readAs64Bits(IByteIterator& data, int opts)
 {
-    unsigned long value = 0;
+    uint64_t value = 0;
 
     // Read source from least-significant byte to most significant byte
     if ((opts & OPT_MASK_ENDIAN) == OPT_LITTLE_ENDIAN)
@@ -95,20 +94,20 @@ unsigned long IntInterpretation::readAsLong(IByteIterator& data, int opts)
         {
             // Read source from left to right
             // Write into the long from left to right
-            int longIdx = 0;
-            while (data.hasNext() && longIdx < sizeof(unsigned long))
+            int valueIdx = 0;
+            while (data.hasNext() && valueIdx < sizeof(uint64_t))
             {
-                ((char *)&value)[longIdx] = data.next();
-                longIdx++;
+                ((byte *)&value)[valueIdx] = data.next();
+                valueIdx++;
             }
         } else {
             // Read source from left to right
             // Write into the long from right to left
-            int longIdx = sizeof(unsigned long);
-            while (data.hasNext() && longIdx >= 0)
+            int valueIdx = sizeof(uint64_t);
+            while (data.hasNext() && valueIdx >= 0)
             {
-                ((char *)&value)[longIdx] = data.next();
-                longIdx--;
+                ((byte *)&value)[valueIdx] = data.next();
+                valueIdx--;
             }
         }
 	
@@ -116,8 +115,8 @@ unsigned long IntInterpretation::readAsLong(IByteIterator& data, int opts)
         // Interpret data as Big Endian
 
         // Read source from right to left
-        byte buffer[sizeof(unsigned long)];
-        for (int bufferIdx = 0; bufferIdx < sizeof(unsigned long); bufferIdx++)
+        byte buffer[sizeof(uint64_t)];
+        for (int bufferIdx = 0; bufferIdx < sizeof(uint64_t); bufferIdx++)
         {
             buffer[bufferIdx] = 0;
         }
@@ -126,27 +125,27 @@ unsigned long IntInterpretation::readAsLong(IByteIterator& data, int opts)
         while (data.hasNext())
         {
             buffer[bufferIdx] = data.next();
-            bufferIdx = (bufferIdx + 1) % sizeof(unsigned long);
+            bufferIdx = (bufferIdx + 1) % sizeof(uint64_t);
         }
 
         if (isSystemLittleEndian())
         {
             // Write into the long from left to right
-            for (int longIdx = 0; longIdx < sizeof(unsigned long); longIdx++)
+            for (int valueIdx = 0; valueIdx < sizeof(uint64_t); valueIdx++)
             {
                 // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
-                bufferIdx = (bufferIdx - 1 + sizeof(unsigned long)) % sizeof(unsigned long);
+                bufferIdx = (bufferIdx - 1 + sizeof(uint64_t)) % sizeof(uint64_t);
 
-                ((char *)&value)[longIdx] = buffer[bufferIdx];
+                ((byte *)&value)[valueIdx] = buffer[bufferIdx];
             }
         } else {
             // Write into the long from right to left
-            for (int longIdx = sizeof(unsigned long); longIdx > 0; longIdx--)
+            for (int valueIdx = sizeof(uint64_t); valueIdx > 0; valueIdx--)
             {
                 // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
-                bufferIdx = (bufferIdx - 1 + sizeof(unsigned long)) % sizeof(unsigned long);
+                bufferIdx = (bufferIdx - 1 + sizeof(uint64_t)) % sizeof(uint64_t);
 
-                ((char *)&value)[longIdx] = buffer[bufferIdx];
+                ((byte *)&value)[valueIdx] = buffer[bufferIdx];
             }
         }
     }
@@ -160,7 +159,7 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
 {
     string out = "";
 
-    unsigned long value = readAsLong(data, opts);
+    uint64_t value = readAs64Bits(data, opts);
 
     // Read source from least-significant byte to most significant byte
     // Write into the output memory from least significant byte to most significant byte
@@ -304,7 +303,7 @@ string ConditionalInterpretation::format(IByteIterator& data, Locale locale)
 {
     IByteIterator* itr = node->dataNode->accessor->iterator();
 
-    unsigned long nodeValue = IntInterpretation::readAsLong(*itr, IntInterpretation::OPT_LITTLE_ENDIAN);
+    uint64_t nodeValue = IntInterpretation::readAs64Bits(*itr, IntInterpretation::OPT_LITTLE_ENDIAN);
 
     // TODO: Rewrite using std::find_if
     for (vector<Condition>::iterator condIter = conditions.begin(); condIter < conditions.end(); condIter++)
@@ -318,9 +317,9 @@ string ConditionalInterpretation::format(IByteIterator& data, Locale locale)
     return pDefault->format(data, locale);
 }
 
-Condition::Condition(unsigned int valueMatch, Interpretation* pInterpretation): valueMatch(valueMatch), pInterpretation(pInterpretation) {}
+Condition::Condition(uint64_t valueMatch, Interpretation* pInterpretation): valueMatch(valueMatch), pInterpretation(pInterpretation) {}
 
-unsigned int Condition::getValueMatch()
+uint64_t Condition::getValueMatch()
 {
     return valueMatch;
 }
