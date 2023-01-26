@@ -183,7 +183,7 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
             Flag(1, "reserved") // bit 15
         };
     Node *compressionNode = new Node("Compression method", 0x8, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN));
-    addChildNode(headerNode, // TODO: Bits 1 and 2 are specifc to compression method 6. This needs to be changed to use a ConditionInterpretation
+    addChildNode(headerNode,
         new Node("Flags", 0x6, 0x2, new ConditionalInterpretation(compressionNode, pDefaultFlagsInterp, {
             Condition(6, pMethod6FlagsInterp),
             Condition(8, pMethod89FlagsInterp),

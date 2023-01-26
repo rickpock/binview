@@ -160,33 +160,13 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
 {
     string out = "";
 
-    unsigned long value = 0;
+    unsigned long value = readAsLong(data, opts);
 
     // Read source from least-significant byte to most significant byte
     // Write into the output memory from least significant byte to most significant byte
     if ((opts & OPT_MASK_ENDIAN) == OPT_LITTLE_ENDIAN)
     {
         // Interpret data as Little Endian
-        if (isSystemLittleEndian())
-        {
-            // Read source from left to right
-            // Write into the long from left to right
-            int longIdx = 0;
-            while (data.hasNext() && longIdx < sizeof(unsigned long))
-            {
-                ((char *)&value)[longIdx] = data.next();
-                longIdx++;
-            }
-        } else {
-            // Read source from left to right
-            // Write into the long from right to left
-            int longIdx = sizeof(unsigned long);
-            while (data.hasNext() && longIdx >= 0)
-            {
-                ((char *)&value)[longIdx] = data.next();
-                longIdx--;
-            }
-        }
 
         out = std::to_string(value);
 	
@@ -226,41 +206,6 @@ string IntInterpretation::format(IByteIterator& data, Locale locale)
         }
     } else {
         // Interpret data as Big Endian
-
-        // Read source from right to left
-        byte buffer[sizeof(unsigned long)];
-        for (int bufferIdx = 0; bufferIdx < sizeof(unsigned long); bufferIdx++)
-        {
-            buffer[bufferIdx] = 0;
-        }
-
-        int bufferIdx = 0;
-        while (data.hasNext())
-        {
-            buffer[bufferIdx] = data.next();
-            bufferIdx = (bufferIdx + 1) % sizeof(unsigned long);
-        }
-
-        if (isSystemLittleEndian())
-        {
-            // Write into the long from left to right
-            for (int longIdx = 0; longIdx < sizeof(unsigned long); longIdx++)
-            {
-                // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
-                bufferIdx = (bufferIdx - 1 + sizeof(unsigned long)) % sizeof(unsigned long);
-
-                ((char *)&value)[longIdx] = buffer[bufferIdx];
-            }
-        } else {
-            // Write into the long from right to left
-            for (int longIdx = sizeof(unsigned long); longIdx > 0; longIdx--)
-            {
-                // Read from buffer backwards (right to left), starting from (bufferIdx - 1)
-                bufferIdx = (bufferIdx - 1 + sizeof(unsigned long)) % sizeof(unsigned long);
-
-                ((char *)&value)[longIdx] = buffer[bufferIdx];
-            }
-        }
 
         out = std::to_string(value);
 	
