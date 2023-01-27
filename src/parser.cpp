@@ -182,7 +182,7 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
             Flag(1, "reserved"), // bit 14
             Flag(1, "reserved") // bit 15
         };
-    Node *compressionNode = new Node("Compression method", 0x8, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN));
+    Node *compressionNode = new Node("Compression method", 0x8, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)); // TODO: Change to enum
     addChildNode(headerNode,
         new Node("Flags", 0x6, 0x2, new ConditionalInterpretation(compressionNode, pDefaultFlagsInterp, {
             Condition(6, pMethod6FlagsInterp),
@@ -230,47 +230,46 @@ long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNod
     Node *headerNode = new Node("Central Directory File Header", parentOffset, centralDirectoryFileHeaderLen, NULL);
     addChildNode(parentNode, headerNode);
 
-    // TODO: Set DisplayTypes
     addChildNode(headerNode,
-        new Node("Signature", 0x0, 0x4, NULL));
+        new Node("Signature", 0x0, 0x4, Interpretation::hex));
     addChildNode(headerNode,
-        new Node("Version", 0x4, 0x2, NULL));
+        new Node("Version", 0x4, 0x2, Interpretation::hex)); // TODO: This can be broken down more
     addChildNode(headerNode,
-        new Node("Version needed", 0x6, 0x2, NULL));
+        new Node("Version needed", 0x6, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Flags", 0x8, 0x2, NULL));
+        new Node("Flags", 0x8, 0x2, NULL)); // TODO
     addChildNode(headerNode,
-        new Node("Compression method", 0xA, 0x2, NULL));
+        new Node("Compression method", 0xA, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN))); // TODO: Change to enum
     addChildNode(headerNode,
-        new Node("File modification time", 0xC, 0x2, NULL));
+        new Node("File modification time", 0xC, 0x2, Interpretation::msdosTime));
     addChildNode(headerNode,
-        new Node("File modification date", 0xE, 0x2, NULL));
+        new Node("File modification date", 0xE, 0x2, Interpretation::msdosDate));
     addChildNode(headerNode,
-        new Node("CRC-32 checksum", 0x10, 0x4, NULL));
+        new Node("CRC-32 checksum", 0x10, 0x4, Interpretation::hex));
     addChildNode(headerNode,
-        new Node("Compressed size", 0x14, 0x4, NULL));
+        new Node("Compressed size", 0x14, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Uncompressed size", 0x18, 0x4, NULL));
+        new Node("Uncompressed size", 0x18, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("File name length", 0x1C, 0x2, NULL));
+        new Node("File name length", 0x1C, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Extra field length", 0x1E, 0x2, NULL));
+        new Node("Extra field length", 0x1E, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("File comment length", 0x20, 0x2, NULL));
+        new Node("File comment length", 0x20, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Disk # start", 0x22, 0x2, NULL));
+        new Node("Disk # start", 0x22, 0x2, new IntInterpretation(IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Internal attributes", 0x24, 0x2, NULL));
+        new Node("Internal attributes", 0x24, 0x2, NULL)); // TODO: Flags
     addChildNode(headerNode,
-        new Node("External attributes", 0x26, 0x4, NULL));
+        new Node("External attributes", 0x26, 0x4, NULL)); // TODO
     addChildNode(headerNode,
-        new Node("Offset of local header", 0x2A, 0x4, NULL));
+        new Node("Offset of local header", 0x2A, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("File name", 0x2E, fileNameLen, NULL));
+        new Node("File name", 0x2E, fileNameLen, Interpretation::ascii));
     addChildNode(headerNode,
-        new Node("Extra field", 0x2E + fileNameLen, extraFieldLen, NULL));
+        new Node("Extra field", 0x2E + fileNameLen, extraFieldLen, Interpretation::hex)); // TODO: This can be broken down more
     addChildNode(headerNode,
-        new Node("File comment", 0x2E + fileNameLen + extraFieldLen, fileCommentLen, NULL));
+        new Node("File comment", 0x2E + fileNameLen + extraFieldLen, fileCommentLen, Interpretation::ascii));
 
     fseek(fp, centralDirectoryFileHeaderLen, SEEK_CUR);
 
