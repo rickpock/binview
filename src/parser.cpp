@@ -283,8 +283,28 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long parentOffset, Node *parentNo
     peekRelative(fp, 0x14, 2, (char *)&commentLen);    // TODO: Error checking
 
     int endOfCentralDirectoryRecordLen = 0x16 + commentLen;
+
     Node *eocdrNode = new Node("End of Central Directory Record", parentOffset, endOfCentralDirectoryRecordLen, NULL);
     addChildNode(parentNode, eocdrNode);
+
+    addChildNode(eocdrNode,
+        new Node("Signature", 0x0, 0x4, Interpretation::hex));
+    addChildNode(eocdrNode,
+        new Node("Disk #", 0x4, 0x2, new IntInterpretation(IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+    addChildNode(eocdrNode,
+        new Node("Disk # w/ central directory", 0x6, 0x2, new IntInterpretation(IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+    addChildNode(eocdrNode,
+        new Node("Disk entries", 0x8, 0x2, new IntInterpretation(IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+    addChildNode(eocdrNode,
+        new Node("Total entries", 0xA, 0x2, new IntInterpretation(IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+    addChildNode(eocdrNode,
+        new Node("Central directory size", 0xC, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+    addChildNode(eocdrNode,
+        new Node("Offset of central directory from starting disk", 0x10, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+    addChildNode(eocdrNode,
+        new Node("Zip file comment", 0x14, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+    addChildNode(eocdrNode,
+        new Node("Comment length", 0x16, commentLen, Interpretation::ascii));
     fseek(fp, endOfCentralDirectoryRecordLen, SEEK_CUR);
 
     return endOfCentralDirectoryRecordLen;
