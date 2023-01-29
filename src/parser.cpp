@@ -207,10 +207,10 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
         })); // TODO: Change to enum
     addChildNode(headerNode,
         new Node("Flags", 0x6, 0x2, new ConditionalInterpretation(compressionNode, pDefaultFlagsInterp, {
-            Condition(6, pMethod6FlagsInterp),
-            Condition(8, pMethod89FlagsInterp),
-            Condition(9, pMethod89FlagsInterp),
-            Condition(14, pMethod14FlagsInterp)
+            ConditionalInterpretation::Condition(6, pMethod6FlagsInterp),
+            ConditionalInterpretation::Condition(8, pMethod89FlagsInterp),
+            ConditionalInterpretation::Condition(9, pMethod89FlagsInterp),
+            ConditionalInterpretation::Condition(14, pMethod14FlagsInterp)
         })));
     addChildNode(headerNode,
         compressionNode);

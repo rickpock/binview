@@ -314,14 +314,14 @@ string ConditionalInterpretation::format(IByteIterator& data, Locale locale)
     return pDefault->format(data, locale);
 }
 
-Condition::Condition(uint64_t valueMatch, Interpretation* pInterpretation): valueMatch(valueMatch), pInterpretation(pInterpretation) {}
+ConditionalInterpretation::Condition::Condition(uint64_t valueMatch, Interpretation* pInterpretation): valueMatch(valueMatch), pInterpretation(pInterpretation) {}
 
-uint64_t Condition::getValueMatch()
+uint64_t ConditionalInterpretation::Condition::getValueMatch()
 {
     return valueMatch;
 }
 
-Interpretation* Condition::getpInterpretation()
+Interpretation* ConditionalInterpretation::Condition::getpInterpretation()
 {
     return pInterpretation;
 }

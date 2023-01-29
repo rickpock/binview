@@ -126,12 +126,23 @@ private:
     vector<Flag> flags;
 };
 
-class Condition;
-
 // Allows for one of several interpretations to be selected based on the value of another node
 class ConditionalInterpretation : public Interpretation
 {
 public:
+    class Condition
+    {
+    public:
+        Condition(uint64_t valueMatch, Interpretation* pInterpretation);
+    
+        uint64_t getValueMatch();
+        Interpretation* getpInterpretation();
+    
+    private:
+        uint64_t valueMatch;
+        Interpretation* pInterpretation;
+    };
+
     ConditionalInterpretation(Node* node, Interpretation* pDefault, initializer_list<Condition> conditions);
 
     string format(IByteIterator&, Locale);
@@ -140,19 +151,6 @@ private:
     Node* node;
     Interpretation* pDefault;
     vector<Condition> conditions;
-};
-
-class Condition
-{
-public:
-    Condition(uint64_t valueMatch, Interpretation* pInterpretation);
-
-    uint64_t getValueMatch();
-    Interpretation* getpInterpretation();
-
-private:
-    uint64_t valueMatch;
-    Interpretation* pInterpretation;
 };
 
 class EnumInterpretation : public Interpretation
