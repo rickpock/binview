@@ -73,7 +73,7 @@ string MsdosTimeInterpretation::format(IByteIterator& data, Locale Locale)
     return std::to_string(hour) + ":" + std::to_string(minute) + ":" + std::to_string(second);
 }
 
-IntInterpretation::IntInterpretation(int opts) : opts(opts) {}
+IntInterpretation::IntInterpretation(uint32_t opts) : opts(opts) {}
 
 bool IntInterpretation::isSystemLittleEndian()
 {
@@ -82,7 +82,7 @@ bool IntInterpretation::isSystemLittleEndian()
 }
 
 // TODO: Switch to inttypes.h data type
-uint64_t IntInterpretation::readAs64Bits(IByteIterator& data, int opts)
+uint64_t IntInterpretation::readAs64Bits(IByteIterator& data, uint32_t opts)
 {
     uint64_t value = 0;
 
@@ -338,7 +338,7 @@ string EnumInterpretation::Enum::getMeaning()
     return meaning;
 }
 
-EnumInterpretation::EnumInterpretation(string defaultMeaning, int opts, initializer_list<Enum> enums): defaultMeaning(defaultMeaning), opts(opts), enums(enums) {}
+EnumInterpretation::EnumInterpretation(string defaultMeaning, uint32_t opts, initializer_list<Enum> enums): defaultMeaning(defaultMeaning), opts(opts), enums(enums) {}
 
 string EnumInterpretation::format(IByteIterator& data, Locale locale)
 {

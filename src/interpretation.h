@@ -67,12 +67,12 @@ public:
         OPT_EXCL_HEX = 0x02
     };
 
-    IntInterpretation(int opts);
+    IntInterpretation(uint32_t opts);
 
-    static uint64_t readAs64Bits(IByteIterator&, int opts);
+    static uint64_t readAs64Bits(IByteIterator&, uint32_t opts);
 
 private:
-    int opts;
+    uint32_t opts;
 
     static bool isSystemLittleEndian();
 };
@@ -169,13 +169,13 @@ public:
         string meaning;
     };
 
-    EnumInterpretation(string defaultMeaning, int opts, initializer_list<Enum> enums);
+    EnumInterpretation(string defaultMeaning, uint32_t opts, initializer_list<Enum> enums);
 
     string format(IByteIterator&, Locale);
 
 private:
     string defaultMeaning;
-    int opts;
+    uint32_t opts;
     vector<Enum> enums;
 };
 
