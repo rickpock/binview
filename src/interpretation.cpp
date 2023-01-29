@@ -278,19 +278,19 @@ string FlagsInterpretation::format(IByteIterator& data, Locale locale)
     return out;
 }
 
-Flag::Flag(uint8_t numBits, initializer_list<string> flagValues): numBits(numBits), flagValues(flagValues) {}
+FlagsInterpretation::Flag::Flag(uint8_t numBits, initializer_list<string> flagValues): numBits(numBits), flagValues(flagValues) {}
 
-Flag::Flag(uint8_t numBits, string flagValue): numBits(numBits)
+FlagsInterpretation::Flag::Flag(uint8_t numBits, string flagValue): numBits(numBits)
 {
     flagValues = vector<string>(1 << numBits, flagValue);
 }
 
-uint8_t Flag::getNumBits()
+uint8_t FlagsInterpretation::Flag::getNumBits()
 {
     return numBits;
 }
 
-string Flag::getInterpretation(unsigned int value)
+string FlagsInterpretation::Flag::getInterpretation(unsigned int value)
 {
     return flagValues.at(value);
 }

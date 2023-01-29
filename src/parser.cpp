@@ -125,62 +125,62 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
     addChildNode(headerNode,
         new Node("Version", 0x4, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     FlagsInterpretation* pDefaultFlagsInterp = new FlagsInterpretation{
-            Flag(1, {"unencrypted", "encrypted"}), // bit 0
-            Flag(2, "undefined"), // bits 1-2
-            Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
-            Flag(1, "reserved"), // bit 4
-            Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
-            Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
-            Flag(4, "unused"), // bits 7-10
-            Flag(1, {"", "UTF-8 field encoding"}), // bit 11
-            Flag(1, "reserved"), // bit 12
-            Flag(1, {"", "Local Header fields masked"}), // bit 13
-            Flag(1, "reserved"), // bit 14
-            Flag(1, "reserved") // bit 15
+            FlagsInterpretation::Flag(1, {"unencrypted", "encrypted"}), // bit 0
+            FlagsInterpretation::Flag(2, "undefined"), // bits 1-2
+            FlagsInterpretation::Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
+            FlagsInterpretation::Flag(1, "reserved"), // bit 4
+            FlagsInterpretation::Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
+            FlagsInterpretation::Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
+            FlagsInterpretation::Flag(4, "unused"), // bits 7-10
+            FlagsInterpretation::Flag(1, {"", "UTF-8 field encoding"}), // bit 11
+            FlagsInterpretation::Flag(1, "reserved"), // bit 12
+            FlagsInterpretation::Flag(1, {"", "Local Header fields masked"}), // bit 13
+            FlagsInterpretation::Flag(1, "reserved"), // bit 14
+            FlagsInterpretation::Flag(1, "reserved") // bit 15
         };
     FlagsInterpretation* pMethod6FlagsInterp = new FlagsInterpretation{
-            Flag(1, {"unencrypted", "encrypted"}), // bit 0
-            Flag(1, {"4K sliding dict", "8k sliding dict"}), // bit 1
-            Flag(1, {"2 Shannon-Fano trees", "3 Shannon-Fano trees"}), // bit 2
-            Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
-            Flag(1, "reserved"), // bit 4
-            Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
-            Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
-            Flag(4, "unused"), // bits 7-10
-            Flag(1, {"", "UTF-8 field encoding"}), // bit 11
-            Flag(1, "reserved"), // bit 12
-            Flag(1, {"", "Local Header fields masked"}), // bit 13
-            Flag(1, "reserved"), // bit 14
-            Flag(1, "reserved") // bit 15
+            FlagsInterpretation::Flag(1, {"unencrypted", "encrypted"}), // bit 0
+            FlagsInterpretation::Flag(1, {"4K sliding dict", "8k sliding dict"}), // bit 1
+            FlagsInterpretation::Flag(1, {"2 Shannon-Fano trees", "3 Shannon-Fano trees"}), // bit 2
+            FlagsInterpretation::Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
+            FlagsInterpretation::Flag(1, "reserved"), // bit 4
+            FlagsInterpretation::Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
+            FlagsInterpretation::Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
+            FlagsInterpretation::Flag(4, "unused"), // bits 7-10
+            FlagsInterpretation::Flag(1, {"", "UTF-8 field encoding"}), // bit 11
+            FlagsInterpretation::Flag(1, "reserved"), // bit 12
+            FlagsInterpretation::Flag(1, {"", "Local Header fields masked"}), // bit 13
+            FlagsInterpretation::Flag(1, "reserved"), // bit 14
+            FlagsInterpretation::Flag(1, "reserved") // bit 15
         };
     FlagsInterpretation* pMethod89FlagsInterp = new FlagsInterpretation{
-            Flag(1, {"unencrypted", "encrypted"}), // bit 0
-            Flag(2, {"normal compression", "maximum compression", "fast compression", "super fast compression"}), // bits 1-2
-            Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
-            Flag(1, "reserved"), // bit 4
-            Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
-            Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
-            Flag(4, "unused"), // bits 7-10
-            Flag(1, {"", "UTF-8 field encoding"}), // bit 11
-            Flag(1, "reserved"), // bit 12
-            Flag(1, {"", "Local Header fields masked"}), // bit 13
-            Flag(1, "reserved"), // bit 14
-            Flag(1, "reserved") // bit 15
+            FlagsInterpretation::Flag(1, {"unencrypted", "encrypted"}), // bit 0
+            FlagsInterpretation::Flag(2, {"normal compression", "maximum compression", "fast compression", "super fast compression"}), // bits 1-2
+            FlagsInterpretation::Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
+            FlagsInterpretation::Flag(1, "reserved"), // bit 4
+            FlagsInterpretation::Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
+            FlagsInterpretation::Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
+            FlagsInterpretation::Flag(4, "unused"), // bits 7-10
+            FlagsInterpretation::Flag(1, {"", "UTF-8 field encoding"}), // bit 11
+            FlagsInterpretation::Flag(1, "reserved"), // bit 12
+            FlagsInterpretation::Flag(1, {"", "Local Header fields masked"}), // bit 13
+            FlagsInterpretation::Flag(1, "reserved"), // bit 14
+            FlagsInterpretation::Flag(1, "reserved") // bit 15
         };
     FlagsInterpretation* pMethod14FlagsInterp = new FlagsInterpretation{
-            Flag(1, {"unencrypted", "encrypted"}), // bit 0
-            Flag(1, {"no EOS marker", "EOS marker used"}), // bit 1
-            Flag(1, "undefined"), // bit 2
-            Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
-            Flag(1, "reserved"), // bit 4
-            Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
-            Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
-            Flag(4, "unused"), // bits 7-10
-            Flag(1, {"", "UTF-8 field encoding"}), // bit 11
-            Flag(1, "reserved"), // bit 12
-            Flag(1, {"", "Local Header fields masked"}), // bit 13
-            Flag(1, "reserved"), // bit 14
-            Flag(1, "reserved") // bit 15
+            FlagsInterpretation::Flag(1, {"unencrypted", "encrypted"}), // bit 0
+            FlagsInterpretation::Flag(1, {"no EOS marker", "EOS marker used"}), // bit 1
+            FlagsInterpretation::Flag(1, "undefined"), // bit 2
+            FlagsInterpretation::Flag(1, {"fields set in local header", "fields set in data descriptor"}), // bit 3
+            FlagsInterpretation::Flag(1, "reserved"), // bit 4
+            FlagsInterpretation::Flag(1, {"not compressed patched data", "compressed patched data"}), // bit 5
+            FlagsInterpretation::Flag(1, {"no strong encryption", "strong encryption"}), // bit 6
+            FlagsInterpretation::Flag(4, "unused"), // bits 7-10
+            FlagsInterpretation::Flag(1, {"", "UTF-8 field encoding"}), // bit 11
+            FlagsInterpretation::Flag(1, "reserved"), // bit 12
+            FlagsInterpretation::Flag(1, {"", "Local Header fields masked"}), // bit 13
+            FlagsInterpretation::Flag(1, "reserved"), // bit 14
+            FlagsInterpretation::Flag(1, "reserved") // bit 15
         };
     Node *compressionNode = new Node("Compression method", 0x8, 0x2, new EnumInterpretation("unknown", IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN, {
             EnumInterpretation::Enum(0, "no compression"),

@@ -89,8 +89,6 @@ public:
     string format(IByteIterator&, Locale);
 };
 
-class Flag;
-
 class NodeInterpretation : public Interpretation
 {
 public:
@@ -105,27 +103,27 @@ private:
 class FlagsInterpretation : public Interpretation
 {
 public:
+    class Flag
+    {
+    public:
+        // TODO: Use different term than "interpretation", which is already used to mean something else
+        Flag(uint8_t numBits, initializer_list<string> flagValues);
+        Flag(uint8_t numBits, string flagValue); // Sets all bit sequences to the same meaning -- commonly used for "unused" or "reserved" bits
+    
+        uint8_t getNumBits();
+        string getInterpretation(unsigned int value);
+    
+    private:
+        uint8_t numBits;
+        vector<string> flagValues;
+    };
+
     FlagsInterpretation(initializer_list<Flag> flags);
 
     string format(IByteIterator&, Locale);
 
 private:
     vector<Flag> flags;
-};
-
-class Flag
-{
-public:
-    // TODO: Use different term than "interpretation", which is already used to mean something else
-    Flag(uint8_t numBits, initializer_list<string> flagValues);
-    Flag(uint8_t numBits, string flagValue); // Sets all bit sequences to the same meaning -- commonly used for "unused" or "reserved" bits
-
-    uint8_t getNumBits();
-    string getInterpretation(unsigned int value);
-
-private:
-    uint8_t numBits;
-    vector<string> flagValues;
 };
 
 class Condition;
