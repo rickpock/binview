@@ -182,7 +182,29 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
             Flag(1, "reserved"), // bit 14
             Flag(1, "reserved") // bit 15
         };
-    Node *compressionNode = new Node("Compression method", 0x8, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)); // TODO: Change to enum
+    Node *compressionNode = new Node("Compression method", 0x8, 0x2, new EnumInterpretation("unknown", IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN, {
+            EnumInterpretation::Enum(0, "no compression"),
+            EnumInterpretation::Enum(1, "shrunk"),
+            EnumInterpretation::Enum(2, "reduced with compression factor 1"),
+            EnumInterpretation::Enum(3, "reduced with compression factor 2"),
+            EnumInterpretation::Enum(4, "reduced with compression factor 3"),
+            EnumInterpretation::Enum(5, "reduced with compression factor 4"),
+            EnumInterpretation::Enum(6, "imploded"),
+            EnumInterpretation::Enum(7, "reserved"),
+            EnumInterpretation::Enum(8, "deflated"),
+            EnumInterpretation::Enum(9, "enhanced deflated"),
+            EnumInterpretation::Enum(10, "PKWare DCL imploded"),
+            EnumInterpretation::Enum(11, "reserved"),
+            EnumInterpretation::Enum(12, "compressed using BZIP2"),
+            EnumInterpretation::Enum(13, "reserved"),
+            EnumInterpretation::Enum(14, "LZMA"),
+            EnumInterpretation::Enum(15, "reserved"),
+            EnumInterpretation::Enum(16, "reserved"),
+            EnumInterpretation::Enum(17, "reserved"),
+            EnumInterpretation::Enum(18, "compressed using IBM TERSE"),
+            EnumInterpretation::Enum(19, "IBM LZ77 z"),
+            EnumInterpretation::Enum(98, "PPMd version I, Rev 1")
+        })); // TODO: Change to enum
     addChildNode(headerNode,
         new Node("Flags", 0x6, 0x2, new ConditionalInterpretation(compressionNode, pDefaultFlagsInterp, {
             Condition(6, pMethod6FlagsInterp),

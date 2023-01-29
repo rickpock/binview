@@ -326,6 +326,43 @@ Interpretation* Condition::getpInterpretation()
     return pInterpretation;
 }
 
+EnumInterpretation::Enum::Enum(uint64_t valueMatch, string meaning): valueMatch(valueMatch), meaning(meaning) {}
+
+uint64_t EnumInterpretation::Enum::getValueMatch()
+{
+    return valueMatch;
+}
+
+string EnumInterpretation::Enum::getMeaning()
+{
+    return meaning;
+}
+
+EnumInterpretation::EnumInterpretation(string defaultMeaning, int opts, initializer_list<Enum> enums): defaultMeaning(defaultMeaning), opts(opts), enums(enums) {}
+
+string EnumInterpretation::format(IByteIterator& data, Locale locale)
+{
+    uint64_t nodeValue = IntInterpretation::readAs64Bits(data, opts);
+
+    IntInterpretation intInterp = IntInterpretation(opts);
+    string out = intInterp.format(data, locale);
+    out += " (";
+    
+    for (vector<Enum>::iterator enumIter = enums.begin(); enumIter < enums.end(); enumIter++)
+    {
+        if (enumIter->getValueMatch() == nodeValue)
+        {
+            out += enumIter->getMeaning();
+            out += ")";
+            return out;
+        }
+    }
+
+    out += defaultMeaning;
+    out += ")";
+    return out;
+}
+
 Interpretation* Interpretation::asciz = new AscizInterpretation();
 Interpretation* Interpretation::ascii = new AsciiInterpretation();
 Interpretation* Interpretation::hex = new HexInterpretation();

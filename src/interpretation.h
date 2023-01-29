@@ -157,4 +157,30 @@ private:
     Interpretation* pInterpretation;
 };
 
+class EnumInterpretation : public Interpretation
+{
+public:
+    class Enum
+    {
+    public:
+        Enum(uint64_t valueMatch, string meaning);
+
+        uint64_t getValueMatch();
+        string getMeaning();
+
+    private:
+        uint64_t valueMatch;
+        string meaning;
+    };
+
+    EnumInterpretation(string defaultMeaning, int opts, initializer_list<Enum> enums);
+
+    string format(IByteIterator&, Locale);
+
+private:
+    string defaultMeaning;
+    int opts;
+    vector<Enum> enums;
+};
+
 #endif
