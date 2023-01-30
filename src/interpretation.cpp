@@ -238,6 +238,58 @@ string NodeInterpretation::format(IByteIterator& data, Locale locale)
     return nodeInterpretation->format(*itr, locale);
 }
 
+AdvancedNodeInterpretation::AdvancedNodeInterpretation(string fmtString, initializer_list<Node*> nodes) : fmtString(fmtString), nodes(nodes) {}
+
+// Outputs "fmtString", but with string sequences '$N' where N is a number is replaced by the interpretation of the Nth node in the initializer list.
+// Also, '$$' is replaced with '$'
+// Only '$1' through '$9' are supported
+string AdvancedNodeInterpretation::format(IByteIterator& data, Locale locale)
+{
+    vector<string> interpretations;
+
+    for (vector<Node*>::iterator iter = nodes.begin(); iter < nodes.end(); iter++)
+    {
+        // TODO: Improve variable names. In particular avoid two usages of iter/itr and interpretation.
+        Interpretation *pInterpretation = (*iter)->pInterpretation;
+        IByteIterator *pItr = (*iter)->dataNode->accessor->iterator();
+        interpretations.push_back(pInterpretation->format(*pItr, locale));
+    }
+
+    string out = "";
+    char flag = '$';
+    bool isFlag = false;
+    const char *fmtStringData = fmtString.c_str();
+    for (uint16_t fmtIdx = 0; fmtStringData[fmtIdx]; fmtIdx++)
+    {
+        char curChar = fmtStringData[fmtIdx];
+
+        if (curChar == flag)
+        {
+            if (isFlag)
+            {
+                out += flag;
+                isFlag = false;
+            } else {
+                isFlag = true;
+            }
+            continue;
+        }
+
+        if (isFlag)
+        {
+            unsigned char flagId = curChar - '1'; // TODO: only flags in range [1,9] are acceptable. Error otherwise.
+            out += interpretations.at(flagId);
+            isFlag = false;
+            continue;
+        }
+
+        out += curChar;
+    }
+
+    return out;
+}
+    
+
 FlagsInterpretation::FlagsInterpretation(initializer_list<Flag> flags) : flags(flags) {}
 
 string FlagsInterpretation::format(IByteIterator& data, Locale locale)

@@ -100,6 +100,19 @@ private:
     Node* node;
 };
 
+// TODO: Should this be combined into NodeInterpretation?
+class AdvancedNodeInterpretation : public Interpretation
+{
+public:
+    AdvancedNodeInterpretation(string fmtString, initializer_list<Node*> nodes);
+
+    string format(IByteIterator&, Locale);
+
+private:
+    string fmtString;
+    vector<Node*> nodes;
+};
+
 class FlagsInterpretation : public Interpretation
 {
 public:
