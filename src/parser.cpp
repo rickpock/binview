@@ -324,9 +324,9 @@ long readEndOfCentralDirectoryRecord(FILE *fp, long parentOffset, Node *parentNo
     addChildNode(eocdrNode,
         new Node("Offset of central directory from starting disk", 0x10, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(eocdrNode,
-        new Node("Zip file comment", 0x14, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
+        new Node("Zip file comment length", 0x14, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(eocdrNode,
-        new Node("Comment length", 0x16, commentLen, Interpretation::ascii));
+        new Node("Zip file comment", 0x16, commentLen, Interpretation::ascii));
     fseek(fp, endOfCentralDirectoryRecordLen, SEEK_CUR);
 
     return endOfCentralDirectoryRecordLen;
