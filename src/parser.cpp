@@ -249,7 +249,9 @@ long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNod
 
     int centralDirectoryFileHeaderLen = 0x2e + fileNameLen + extraFieldLen + fileCommentLen;
 
-    Node *headerNode = new Node("Central Directory File Header", parentOffset, centralDirectoryFileHeaderLen, NULL);
+    Node *filenameNode = new Node("File name", 0x2E, fileNameLen, Interpretation::ascii);
+
+    Node *headerNode = new Node("Central Directory File Header", parentOffset, centralDirectoryFileHeaderLen, new NodeInterpretation(filenameNode));
     addChildNode(parentNode, headerNode);
 
     addChildNode(headerNode,
@@ -286,8 +288,7 @@ long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNod
         new Node("External attributes", 0x26, 0x4, NULL)); // TODO
     addChildNode(headerNode,
         new Node("Offset of local header", 0x2A, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
-    addChildNode(headerNode,
-        new Node("File name", 0x2E, fileNameLen, Interpretation::ascii));
+    addChildNode(headerNode, filenameNode);
     addChildNode(headerNode,
         new Node("Extra field", 0x2E + fileNameLen, extraFieldLen, Interpretation::hex)); // TODO: This can be broken down more
     addChildNode(headerNode,
