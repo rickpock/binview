@@ -204,7 +204,7 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
             EnumInterpretation::Enum(18, "compressed using IBM TERSE"),
             EnumInterpretation::Enum(19, "IBM LZ77 z"),
             EnumInterpretation::Enum(98, "PPMd version I, Rev 1")
-        })); // TODO: Change to enum
+        }));
     addChildNode(headerNode,
         new Node("Flags", 0x6, 0x2, new ConditionalInterpretation(compressionNode, pDefaultFlagsInterp, {
             ConditionalInterpretation::Condition(6, pMethod6FlagsInterp),
@@ -256,8 +256,34 @@ long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNod
 
     addChildNode(headerNode,
         new Node("Signature", 0x0, 0x4, Interpretation::hex));
-    addChildNode(headerNode,
-        new Node("Version", 0x4, 0x2, Interpretation::hex)); // TODO: This can be broken down more
+    Node *zipSpecVersionNode = new Node("ZIP specification version", 0x0, 0x1, Interpretation::hex); // TODO: The value/10 indicates the major version number, and the value mod 10 is the minor version number.  
+    Node *versionMadeByNode = new Node("Version made by", 0x1, 0x1, new EnumInterpretation("Unknown", IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN, {
+            EnumInterpretation::Enum(0, "MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)"),
+            EnumInterpretation::Enum(1, "Amiga"),
+            EnumInterpretation::Enum(2, "OpenVMS"),
+            EnumInterpretation::Enum(3, "UNIX"),
+            EnumInterpretation::Enum(4, "VM/CMS"),
+            EnumInterpretation::Enum(5, "Atari ST"),
+            EnumInterpretation::Enum(6, "OS/2 H.P.F.S."),
+            EnumInterpretation::Enum(7, "Macintosh"),
+            EnumInterpretation::Enum(8, "Z-System"),
+            EnumInterpretation::Enum(9, "CP/M"),
+            EnumInterpretation::Enum(10, "Windows NTFS"),
+            EnumInterpretation::Enum(11, "MVS (OS/390 - Z/OS)"),
+            EnumInterpretation::Enum(12, "VSE"),
+            EnumInterpretation::Enum(13, "Acorn Risc"),
+            EnumInterpretation::Enum(14, "VFAT"),
+            EnumInterpretation::Enum(15, "alternative MVS"),
+            EnumInterpretation::Enum(16, "BeOS"),
+            EnumInterpretation::Enum(17, "Tandem"),
+            EnumInterpretation::Enum(18, "OS/400"),
+            EnumInterpretation::Enum(19, "OS X (Darwin)")
+        }));
+    Node *versionNode = new Node("Version", 0x4, 0x2, Interpretation::hex);
+    addChildNode(versionNode, zipSpecVersionNode);
+    addChildNode(versionNode, versionMadeByNode);
+    addChildNode(headerNode, versionNode);
+        //new Node("Version", 0x4, 0x2, Interpretation::hex)); // TODO: This can be broken down more
     addChildNode(headerNode,
         new Node("Version needed", 0x6, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
