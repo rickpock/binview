@@ -395,6 +395,7 @@ EnumInterpretation::EnumInterpretation(string defaultMeaning, uint32_t opts, ini
 string EnumInterpretation::format(IByteIterator& data, Locale locale)
 {
     uint64_t nodeValue = IntInterpretation::readAs64Bits(data, opts);
+    data.reset();
 
     IntInterpretation intInterp = IntInterpretation(opts);
     string out = intInterp.format(data, locale);
