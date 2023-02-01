@@ -21,6 +21,7 @@ long peek(FILE *fp, long n, char *out);
 long peekRelative(FILE *fp, long offset, long n, char *out);
 
 long readLocalFileHeader(FILE *fp, long offset, Node *parentNode);
+long readExtraField(FILE *fp, long offset, Node *parentNode);
 long readCentralDirectory(FILE *fp, long offset, Node *parentNode);
 long readCentralDirectoryFileHeader(FILE *fp, long offset, Node *parentNode);
 long readEndOfCentralDirectoryRecord(FILE *fp, long offset, Node *parentNode);
@@ -229,13 +230,37 @@ long readLocalFileHeader(FILE *fp, long parentOffset, Node *parentNode)
     addChildNode(headerNode,
         new Node("Extra field length", 0x1C, 0x2, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode, filenameNode);
-    addChildNode(headerNode,
-        new Node("Extra field", 0x1E + fileNameLen, extraFieldLen, Interpretation::hex));
 
-    fseek(fp, localFileHeaderLen + compressedSize, SEEK_CUR);
+    long extraFieldOffset = 0;
+    Node *extraFieldsNode = new Node("Extra fields", 0x1E + fileNameLen, extraFieldLen, Interpretation::hex);
+    fseek(fp, 0x1E + fileNameLen, SEEK_CUR);
+    while (extraFieldOffset < extraFieldLen)
+    {
+        extraFieldOffset += readExtraField(fp, extraFieldOffset, extraFieldsNode);
+        fprintf(stderr, "extraFieldOffset: %lu", extraFieldOffset);
+    }
+    addChildNode(headerNode, extraFieldsNode);
+
+    fseek(fp, compressedSize, SEEK_CUR);
 
     return localFileHeaderLen + compressedSize;
 }
+
+long readExtraField(FILE *fp, long parentOffset, Node *parentNode)
+{
+    uint16_t headerLen = 0x4;
+    uint16_t dataLen;
+
+    peekRelative(fp, 0x2, 2, (char *)&dataLen);	// TODO: Error checking
+
+    Node *extraFieldNode = new Node("Extra Field", parentOffset, headerLen + dataLen, NULL);
+    addChildNode(parentNode, extraFieldNode);
+
+    fseek(fp, headerLen + dataLen, SEEK_CUR);
+
+    return headerLen + dataLen;
+}
+
 
 long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNode)
 {
