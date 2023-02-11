@@ -419,9 +419,9 @@ long readCentralDirectoryFileHeader(FILE *fp, long parentOffset, Node *parentNod
     addChildNode(headerNode,
         new Node("Disk # start", 0x22, 0x2, new IntInterpretation(IntInterpretation::OPT_EXCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode,
-        new Node("Internal attributes", 0x24, 0x2, NULL)); // TODO: Flags
+        new Node("Internal attributes", 0x24, 0x2, Interpretation::hex));
     addChildNode(headerNode,
-        new Node("External attributes", 0x26, 0x4, NULL)); // TODO
+        new Node("External attributes", 0x26, 0x4, Interpretation::hex));
     addChildNode(headerNode,
         new Node("Offset of local header", 0x2A, 0x4, new IntInterpretation(IntInterpretation::OPT_INCL_HEX | IntInterpretation::OPT_LITTLE_ENDIAN)));
     addChildNode(headerNode, filenameNode);
