@@ -11,6 +11,7 @@
 
 void draw(FILE *fp, const Node *root, const Node *selected);
 
+int nodeHasChild(const Node *node);
 int expandNode(const Node *root, const Node *selected);
 
 unsigned char toPrintableChar(unsigned char ch);
@@ -133,6 +134,11 @@ void draw(FILE *fp, const Node *root, const Node *selected)
 
     printHierarchy(fp, root, selected);
     setColor(NONE);
+}
+
+int nodeHasChild(const Node *node)
+{
+    return (node->firstChild != NULL) ? 1 : 0;
 }
 
 // Expand root if it is an ancestor of selected
@@ -388,6 +394,17 @@ void printHierarchyRecur(FILE *fp, const Node *node, const Node *selected, int d
         setColor(WHITE);
     } else {
         setColor(NONE);
+    }
+    if (nodeHasChild(node))
+    {
+        if (expandNode(node, selected))
+        {
+            printf("- ");
+        } else {
+            printf("+ ");
+        }
+    } else {
+        printf("  ");
     }
     printf("%s", node->description);
     printf(": ");
