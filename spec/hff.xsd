@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- common -->
+  <xs:complexType name="empty" />
+
+  <!-- interpretation tags -->
+  <xs:complexType name="interpretation">
+    <xs:choice>
+      <xs:element name="ascizInterpretation" type="empty" />
+      <xs:element name="asciiInterpretation" type="empty" />
+      <xs:element name="hexInterpretation" type="empty" />
+      <xs:element name="intInterpretation">
+	<xs:complexType>
+	  <xs:complexContent>
+	    <xs:extension base="optHex">
+	      <xs:choice minOccurs="0">
+		<xs:element name="littleEndian" type="empty" />
+		<xs:element name="bigEndian" type="empty" />
+	      </xs:choice>
+	    </xs:extension>
+	  </xs:complexContent>
+	</xs:complexType>
+      </xs:element>
+      <xs:element name="msdosDateInterpretation" type="empty" />
+      <xs:element name="msdosTimeInterpretation" type="empty" />
+      <xs:element name="nodeInterpretation">
+	<xs:complexType>
+	  <xs:attribute name="nodePath" type="xs:string" use="required" />
+	</xs:complexType>
+      </xs:element>
+      <xs:element name="flagsInterpretation">
+	<xs:complexType>
+	  <xs:sequence minOccurs="1" maxOccurs="unbounded">
+	    <xs:element name="flag">
+	      <xs:complexType>
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+		  <!-- There should be 2^`bits` `value` elements, unless `constantValue` is set. -->
+		  <xs:element name="value" type="xs:string" />
+		</xs:sequence>
+		<xs:attribute name="bits" type="xs:integer" default="1" />
+		<!-- Only the `constantValue` attribute or the `value` elements should be used, but not both. -->
+		<xs:attribute name="constantValue" type="xs:string" />
+	      </xs:complexType>
+	    </xs:element>
+	  </xs:sequence>
+	</xs:complexType>
+      </xs:element>
+      <xs:element name="conditionalInterpretation">
+	<xs:complexType>
+	  <xs:sequence minOccurs="1" maxOccurs="unbounded">
+	    <xs:element name="condition">
+	      <xs:complexType>
+		<xs:sequence>
+		  <!-- No more than one `rule` element should have string content of "default" -->
+		  <!-- TODO: Describe `rule` notation -->
+		  <!-- TODO: Do we test for comprehensiveness of rules? Do we require a default `rule` if we can't validate comprehensiveness? -->
+		  <xs:element name="rule" type="xs:string" />
+		  <xs:element name="interpretation" type="interpretation" />
+		</xs:sequence>
+	      </xs:complexType>
+	    </xs:element>
+	  </xs:sequence>
+	</xs:complexType>
+      </xs:element>
+      <xs:element name="enumInterpretation">
+	<xs:complexType>
+	  <xs:complexContent>
+	    <xs:extension base="optHexEndian">
+	      <!-- No more than one `enum` element should have an `id` of "default" -->
+	      <!-- Each `enum` element should have a unique `id` attribute within the `enumInterpretation` -->
+	      <xs:sequence minOccurs="1" maxOccurs="unbounded">
+		<xs:element name="enum">
+		  <xs:complexType>
+		    <xs:attribute name="id" type="xs:string" use="required" />
+		    <xs:attribute name="value" type="xs:string" use="required" />
+		  </xs:complexType>
+		</xs:element>
+	      </xs:sequence>
+	    </xs:extension>
+	  </xs:complexContent>
+	</xs:complexType>
+      </xs:element>
+      <xs:element name="nullInterpretation" type="empty" />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="optHex">
+    <xs:choice minOccurs="1">
+      <xs:element name="inclHex" type="empty" />
+      <xs:element name="exclHex" type="empty" />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="optHexEndian">
+    <xs:complexContent>
+      <xs:extension base="optHex">
+        <xs:choice minOccurs="0">
+	  <xs:element name="littleEndian" type="empty" />
+          <xs:element name="bigEndian" type="empty" />
+	</xs:choice>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- organization types -->
+
+  <xs:complexType name="sectionRef">
+    <!-- A `section` tag must exist under the `hff` tag, whose `name` attribute is the same as the `ref` attribute value -->
+    <xs:attribute name="ref" type="xs:string" use="required" />
+    <!-- `sizeExpr` must be used iff the referenced section has the `autoSize` attribute set to false -->
+    <xs:attribute name="sizeExpr" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="field">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element name="interpretation" type="interpretation" />
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="label" type="xs:string" use="required" />
+    <!-- There must be exactly one of either `size` or `sizeExpr` attributes -->
+    <xs:attribute name="size" type="xs:integer" />
+    <xs:attribute name="sizeExpr" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="variant">
+    <xs:sequence>
+      <!-- TODO: Describe `rule` notation -->
+      <xs:element name="rule" type="xs:string" />
+      <xs:element name="sectionRef" type="sectionRef" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="sequence">
+    <xs:choice minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="section" type="section" maxOccurs="unbounded" />
+      <xs:element name="sectionRef" type="sectionRef" maxOccurs="unbounded" />
+      <xs:element name="field" type="field" maxOccurs="unbounded" />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="collection">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="variant" type="variant" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="section">
+    <xs:sequence>
+      <xs:element name="interpretation" type="interpretation" minOccurs="0" />
+      <xs:choice>
+        <xs:element name="sequence" type="sequence" />
+        <xs:element name="collection" type="collection" />
+      </xs:choice>
+    </xs:sequence>
+    <!-- Each `section` element should have a unique `name` attribute -->
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="label" type="xs:string" />
+    <!-- `section` tags with a `collection` child tag must have `autoSize` set to false -->
+    <xs:attribute name="autoSize" type="xs:string" default="true" />
+    <xs:attribute name="virtual" type="xs:string" default="false" />
+    <!-- Only one `section` tag may have the `root` attribute set to true -->
+    <xs:attribute name="root" type="xs:string" default="false" />
+  </xs:complexType>
+
+  <!-- root -->
+  
+  <xs:element name="hff">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="section" type="section" maxOccurs="unbounded" />
+      </xs:sequence>
+      <xs:attribute name="schemaVersion" type="xs:integer" use="required" />
+      <xs:attribute name="namespace" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
