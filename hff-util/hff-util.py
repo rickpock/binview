@@ -123,9 +123,25 @@ def validate(xml_path, schema_path):
     if len(section_root_els) > 1:
         print(f'Multiple `section` tags are set to "root" at lines {[section_el.sourceline for section_el in section_root_els]}. Only one `section` may be set to root.')
 
+    print("File is valid.")
+
 if __name__ == "__main__":
     dir_path = os.path.dirname(os.path.realpath(__file__))
     schema_path = os.path.join(dir_path, 'hff.xsd')
 
-    xml_path = os.sys.argv[1]
-    validate(xml_path, schema_path)
+    if len(os.sys.argv) < 2:
+        # TODO: Better error message / usage instructions
+        print("Command expected")
+        sys.exit()
+
+    command = os.sys.argv[1]
+
+    if command == "validate":
+        # TODO: Check arguments
+        xml_path = os.sys.argv[2]
+        validate(xml_path, schema_path)
+        sys.exit()
+
+    # TODO: Better error message / usage instructions
+    print(f'Command {command} not recognized.')
+    sys.exit()
