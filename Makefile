@@ -6,3 +6,6 @@ build: clean
 
 run:
 	./a.out test/resources/example2.zip
+
+build-hff-util:
+	cd hff-util && pyinstaller --add-data hff.xsd:. -y hff-util.py
