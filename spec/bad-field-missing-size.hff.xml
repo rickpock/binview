@@ -1,0 +1,835 @@
+<hff schemaVersion="1" namespace="zip">
+	<section name="zip" root="true">
+		<collection>
+			<variant>
+				<rule>it->localFileHeader->signature == 0x04034b50</rule>
+				<sectionRef ref="localFile" />
+			</variant>
+			<variant>
+				<rule>it->centralDirectoryFileHeader->signature == 0x02014b50</rule>
+				<sectionRef ref="centralDirectory" />
+			</variant>
+		</collection>
+	</section>
+
+	<section name="localFile" virtual="true">
+		<sequence>
+			<sectionRef ref="localFileHeader" />
+			<field name="localFileData" label="Local File Data" sizeExpr="prev->compressedSize">
+				<interpretation>
+					<nodeInterpretation nodePath="prev->fileName" />
+				</interpretation>
+			</field>
+		</sequence>
+	</section>
+
+	<section name="localFileHeader" label="Local File Header">
+		<interpretation><nodeInterpretation nodePath="this->fileName" /></interpretation>
+		<sequence>
+			<field name="signature" label="Signature">
+				<interpretation><hexInterpretation /></interpretation>
+			</field>
+			<field name="version" label="Version" size="2">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="flags" label="Flags" size="2">
+				<interpretation>
+					<conditionalInterpretation>
+						<condition>
+							<rule>default</rule>
+							<interpretation>
+								<flagsInterpretation>
+									<flag bits="1"> <!-- bit 0 -->
+										<value>unencrypted</value> <!-- 0 -->
+										<value>encrypted</value> <!-- 1 -->
+									</flag>
+									<flag bits="2" constantValue="undefined" /> <!-- bits 1-2 -->
+									<flag bits="1"> <!-- bit 3 -->
+										<value>fields set in local header</value> <!-- 0 -->
+										<value>fields set in data descriptor</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 4 -->
+									<flag bits="1"> <!-- bit 5 -->
+										<value>not compressed patched data</value> <!-- 0 -->
+										<value>compressed patched data</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 6 -->
+										<value>no strong encryption</value> <!-- 0 -->
+										<value>strong encryption</value> <!-- 1 -->
+									</flag>
+									<flag bits="4" constantValue="unused" /> <!-- bits 7-10 -->
+									<flag bits="1"> <!-- bit 11 -->
+										<value></value> <!-- 0 -->
+										<value>UTF-8 field encoding</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 12 -->
+									<flag bits="1"> <!-- bit 13 -->
+										<value></value> <!-- 0 -->
+										<value>Local Header fields masked</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 14 -->
+									<flag bits="1" constantValue="reserved" /> <!-- bit 15 -->
+								</flagsInterpretation>
+							</interpretation>
+						</condition>
+						<condition>
+							<rule>parent->compressionMethod == 6</rule>
+							<interpretation>
+								<flagsInterpretation>
+									<flag bits="1"> <!-- bit 0 -->
+										<value>unencrypted</value> <!-- 0 -->
+										<value>encrypted</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 1 -->
+										<value>4K sliding dict</value> <!-- 0 -->
+										<value>8K sliding dict</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 2 -->
+										<value>2 Shannon-Fano trees</value> <!-- 0 -->
+										<value>3 Shannon-Fano trees</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 3 -->
+										<value>fields set in local header</value> <!-- 0 -->
+										<value>fields set in data descriptor</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 4 -->
+									<flag bits="1"> <!-- bit 5 -->
+										<value>not compressed patched data</value> <!-- 0 -->
+										<value>compressed patched data</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 6 -->
+										<value>no strong encryption</value> <!-- 0 -->
+										<value>strong encryption</value> <!-- 1 -->
+									</flag>
+									<flag bits="4" constantValue="unused" /> <!-- bits 7-10 -->
+									<flag bits="1"> <!-- bit 11 -->
+										<value></value> <!-- 0 -->
+										<value>UTF-8 field encoding</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="unused" /> <!-- bit 12 -->
+									<flag bits="1"> <!-- bit 13 -->
+										<value></value> <!-- 0 -->
+										<value>Local Header fields masked</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 14 -->
+									<flag bits="1" constantValue="reserved" /> <!-- bit 15 -->
+								</flagsInterpretation>
+							</interpretation>
+						</condition>
+						<condition>
+							<rule>parent->compressionMethod == 8 || compressionMethod == 9</rule>
+							<interpretation>
+								<flagsInterpretation>
+									<flag bits="1"> <!-- bit 0 -->
+										<value>unencrypted</value> <!-- 0 -->
+										<value>encrypted</value> <!-- 1 -->
+									</flag>
+									<flag bits="2"> <!-- bits 1-2 -->
+										<value>normal compression</value> <!-- 0 -->
+										<value>maximum compression</value> <!-- 1 -->
+										<value>fast compression</value> <!-- 2 -->
+										<value>super fast compression</value> <!-- 3 -->
+									</flag>
+									<flag bits="1"> <!-- bit 3 -->
+										<value>fields set in local header</value> <!-- 0 -->
+										<value>fields set in data descriptor</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 4 -->
+									<flag bits="1"> <!-- bit 5 -->
+										<value>not compressed patched data</value> <!-- 0 -->
+										<value>compressed patched data</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 6 -->
+										<value>no strong encryption</value> <!-- 0 -->
+										<value>strong encryption</value> <!-- 1 -->
+									</flag>
+									<flag bits="4" constantValue="unused" /> <!-- bits 7-10 -->
+									<flag bits="1"> <!-- bit 11 -->
+										<value></value> <!-- 0 -->
+										<value>UTF-8 field encoding</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 12 -->
+									<flag bits="1"> <!-- bit 13 -->
+										<value></value> <!-- 0 -->
+										<value>Local Header fields masked</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 14 -->
+									<flag bits="1" constantValue="reserved" /> <!-- bit 15 -->
+								</flagsInterpretation>
+							</interpretation>
+						</condition>
+						<condition>
+							<rule>parent->compressionMethod == 14</rule>
+							<interpretation>
+								<flagsInterpretation>
+									<flag bits="1"> <!-- bit 0 -->
+										<value>unencrypted</value> <!-- 0 -->
+										<value>encrypted</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 1 -->
+										<value>4K sliding dict</value> <!-- 0 -->
+										<value>8K sliding dict</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 2 -->
+										<value>2 Shannon-Fano trees</value> <!-- 0 -->
+										<value>3 Shannon-Fano trees</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 3 -->
+										<value>fields set in local header</value> <!-- 0 -->
+										<value>fields set in data descriptor</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 4 -->
+									<flag bits="1"> <!-- bit 5 -->
+										<value>not compressed patched data</value> <!-- 0 -->
+										<value>compressed patched data</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 6 -->
+										<value>no strong encryption</value> <!-- 0 -->
+										<value>strong encryption</value> <!-- 1 -->
+									</flag>
+									<flag bits="4" constantValue="unused" /> <!-- bits 7-10 -->
+									<flag bits="1"> <!-- bit 11 -->
+										<value></value> <!-- 0 -->
+										<value>UTF-8 field encoding</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="unused" /> <!-- bit 12 -->
+									<flag bits="1"> <!-- bit 13 -->
+										<value></value> <!-- 0 -->
+										<value>Local Header fields masked</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 14 -->
+									<flag bits="1" constantValue="reserved" /> <!-- bit 15 -->
+								</flagsInterpretation>
+							</interpretation>
+						</condition>
+					</conditionalInterpretation>
+				</interpretation>
+			</field>
+			<field name="compressionMethod" label="Compression method" size="2">
+				<interpretation>
+					<enumInterpretation>
+						<exclHex />
+						<littleEndian />
+
+						<enum id="default" value="unknown" />
+						<enum id="0" value="no compression" />
+						<enum id="1" value="shrunk" />
+						<enum id="2" value="reduced with compression factor 1" />
+						<enum id="3" value="reduced with compression factor 2" />
+						<enum id="4" value="reduced with compression factor 3" />
+						<enum id="5" value="reduced with compression factor 4" />
+						<enum id="6" value="imploded" />
+						<enum id="7" value="reserved" />
+						<enum id="8" value="deflated" />
+						<enum id="9" value="enhanced deflated" />
+						<enum id="10" value="PKWare DCL imploded" />
+						<enum id="11" value="reserved" />
+						<enum id="12" value="compressed using BZIP2" />
+						<enum id="13" value="reserved" />
+						<enum id="14" value="LZMA" />
+						<enum id="15" value="reserved" />
+						<enum id="16" value="reserved" />
+						<enum id="17" value="reserved" />
+						<enum id="18" value="compressed using IBM TERSE" />
+						<enum id="19" value="IBM LZ77 z" />
+						<enum id="20" value="deprecated" />
+						<enum id="93" value="Zstandard" />
+						<enum id="94" value="MP3" />
+						<enum id="95" value="XZ" />
+						<enum id="96" value="JPEG variant" />
+						<enum id="97" value="WavPack" />
+						<enum id="98" value="PPMd version I, Rev 1" />
+						<enum id="99" value="AE-x encryption marker" />
+					</enumInterpretation>
+				</interpretation>
+			</field>
+			<field name="fileModificationTime" label="File modification time" size="2">
+				<interpretation>
+					<msdosTimeInterpretation />
+				</interpretation>
+			</field>
+			<field name="fileModificationDate" label="File modification date" size="2">
+				<interpretation>
+					<msdosDateInterpretation />
+				</interpretation>
+			</field>
+			<field name="crc32Checksum" label="CRC-32 checksum" size="4">
+				<interpretation>
+					<hexInterpretation />
+				</interpretation>
+			</field>
+			<field name="compressedSize" label="Compressed size" size="4">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="uncompressedSize" label="Uncompressed size" size="4">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="fileNameLength" label="File name length" size="2">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="extraFieldLength" label="Extra field length" size="2">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="fileName" label="File name" sizeExpr="parent->fileNameLength">
+				<interpretation><asciiInterpretation /></interpretation>
+			</field>
+			<sectionRef ref="localExtraFields" sizeExpr="parent->extraFieldLength" />
+		</sequence>
+	</section>
+
+	<section name="localExtraFields" label="Extra fields" autoSize="false">
+		<interpretation><hexInterpretation /></interpretation>
+		<collection>
+			<variant>
+				<rule>default</rule>
+				<sectionRef ref="localExtraField" />
+			</variant>
+		</collection>
+	</section>
+
+	<section name="localExtraField" label="Extra Field">
+		<interpretation><nodeInterpretation nodePath="this->headerId" /></interpretation>
+		<sequence>
+			<field name="headerId" label="Header ID" size="2">
+				<interpretation>
+					<enumInterpretation>
+						<inclHex />
+						<littleEndian />
+
+						<enum id="default" value="unknown" />
+						<enum id="0x0001" value="Zip64 extended information extra field" />
+						<enum id="0x0007" value="AV Info" />
+						<enum id="0x0008" value="Reserved for extended language encoding data (PFS)" />
+						<enum id="0x0009" value="OS/2" />
+						<enum id="0x000A" value="NTFS" />
+						<enum id="0x000C" value="OpenVMS" />
+						<enum id="0x000D" value="UNIX" />
+						<enum id="0x000E" value="Reserved for file stream and fork descriptors" />
+						<enum id="0x000F" value="Patch Descriptor" />
+						<enum id="0x0014" value="PKCS#7 Store for X.509 Certificates" />
+						<enum id="0x0015" value="X.509 Certificate ID and Signature for individual file" />
+						<enum id="0x0016" value="X.509 Certificate ID for Central Directory" />
+						<enum id="0x0017" value="Strong Encryption Header" />
+						<enum id="0x0018" value="Record Management Controls" />
+						<enum id="0x0019" value="PKCS#7 Encryption Recipient Certificate List" />
+						<enum id="0x0020" value="Reserved for Timestamp Record" />
+						<enum id="0x0021" value="Policy Decryption Key Record" />
+						<enum id="0x0022" value="Smartcrypt Key Provider Record" />
+						<enum id="0x0023" value="Smartcrypt Policy Key Data Record" />
+						<enum id="0x0065" value="IBM S/390 (Z390), AS/400 (I400) attributes - uncompressed" />
+						<enum id="0x0066" value="Reserved for IBM S/390 (Z390), AS/400 (I400) attributes - compressed" />
+						<enum id="0x4690" value="POSZIP 4690 (reserved)" />
+						<enum id="0x07C8" value="Macintosh" />
+						<enum id="0x1986" value="Pixar USD header ID" />
+						<enum id="0x2605" value="ZipIt Macintosh" />
+						<enum id="0x2705" value="ZipIt Macintosh 1.3.5+" />
+						<enum id="0x2805" value="ZipIt Macintosh 1.3.5+" />
+						<enum id="0x334D" value="Info-ZIP Macintosh" />
+						<enum id="0x4154" value="Tandem" />
+						<enum id="0x4341" value="Acorn/SparkFS" />
+						<enum id="0x4453" value="Windows NT security descriptor (binary ACL)" />
+						<enum id="0x4704" value="VM/CMS" />
+						<enum id="0x470F" value="VMS" />
+						<enum id="0x4854" value="THEOS" />
+						<enum id="0x4B46" value="FWKCS MD5" />
+						<enum id="0x4C41" value="OS/2 access control list (text ACL)" />
+						<enum id="0x4D49" value="Info-ZIP OpenVMS" />
+						<enum id="0x4D63" value="Macintosh Smartzip" />
+						<enum id="0x4F4C" value="Xceed original location extra field" />
+						<enum id="0x5356" value="AOS/VS (ACL)" />
+						<enum id="0x5455" value="extended timestamp" />
+						<enum id="0x554E" value="Xceed unicode extra field" />
+						<enum id="0x5855" value="Info-ZIP UNIX (original, also OS/2, NT, etc)" />
+						<enum id="0x6375" value="Info-ZIP Unicode Comment Extra Field" />
+						<enum id="0x6542" value="BeOS/BeBox" />
+						<enum id="0x6854" value="THEOS" />
+						<enum id="0x7075" value="Info-ZIP Unicode Path Extra Field" />
+						<enum id="0x7441" value="AtheOS/Syllable" />
+						<enum id="0x756E" value="ASi UNIX" />
+						<enum id="0x7855" value="Info-ZIP UNIX (new)" />
+						<enum id="0x7875" value="INFO-ZIP UNIX (newer UID/GID)" />
+						<enum id="0xA11E" value="Data Stream Alignment (Apache Commons-Compress)" />
+						<enum id="0xA220" value="Microsoft Open Packaging Growth Hint" />
+						<enum id="0xCAFE" value="Java JAR file Extra Field Header ID" />
+						<enum id="0xD935" value="Android ZIP Alignment Extra Field" />
+						<enum id="0xE57A" value="Korean ZIP code page info" />
+						<enum id="0xFD4A" value="SMS/QDOS" />
+						<enum id="0x9901" value="AE-x encryption structure" />
+						<enum id="0x9902" value="unknown" />
+					</enumInterpretation>
+				</interpretation>
+			</field>
+			<field name="dataSize" label="Data size" size="2">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="data" label="Extra field data" sizeExpr="parent->dataSize">
+				<interpretation><hexInterpretation /></interpretation>
+			</field>
+		</sequence>
+	</section>
+
+	<section name="centralDirectory" label="Central Directory">
+		<interpretation><nullInterpretation /></interpretation>
+		<sequence>
+			<sectionRef ref="centralDirectoryFileHeaders" />
+			<sectionRef ref="endOfCentralDirectoryRecord" />
+		</sequence>
+	</section>
+
+	<section name="centralDirectoryFileHeaders" virtual="true">
+		<collection>
+			<variant>
+				<rule>default</rule>
+				<sectionRef ref="centralDirectoryFileHeader" />
+			</variant>
+		</collection>
+	</section>
+
+	<section name="centralDirectoryFileHeader" label="Central Directory File Header">
+		<interpretation><nodeInterpretation nodePath="this->fileName" /></interpretation>
+		<sequence>
+			<field name="signature" label="Signature" size="4">
+				<interpretation><hexInterpretation /></interpretation>
+			</field>
+			<section name="version" label="Version">
+				<interpretation><hexInterpretation /></interpretation>
+				<sequence>
+					<field name="zipSpecVersion" label="ZIP specification version" size="1">
+						<interpretation><hexInterpretation /></interpretation>
+					</field>
+					<field name="versionMadeBy" label="Version made by" size="1">
+						<interpretation>
+							<enumInterpretation>
+								<exclHex />
+								<littleEndian />
+
+								<enum id="default" value="Unknown" />
+								<enum id="0" value="MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)" />
+								<enum id="1" value="Amiga" />
+								<enum id="2" value="OpenVMS" />
+								<enum id="3" value="UNIX" />
+								<enum id="4" value="VM/CMS" />
+								<enum id="5" value="Atari ST" />
+								<enum id="6" value="OS/2 H.P.F.S." />
+								<enum id="7" value="Macintosh" />
+								<enum id="8" value="Z-System" />
+								<enum id="9" value="CP/M" />
+								<enum id="10" value="Windows NTFS" />
+								<enum id="11" value="MVS (OS/390 - Z/OS)" />
+								<enum id="12" value="VSE" />
+								<enum id="13" value="Acorn Risc" />
+								<enum id="14" value="VFAT" />
+								<enum id="15" value="alternative MVS" />
+								<enum id="16" value="BeOS" />
+								<enum id="17" value="Tandem" />
+								<enum id="18" value="OS/400" />
+								<enum id="19" value="OS X (Darwin)" />
+							</enumInterpretation>
+						</interpretation>
+					</field>
+				</sequence>
+			</section>
+			<field name="versionNeeded" label="Version needed" size="2">
+				<interpretation>
+				  <hexInterpretation />
+				</interpretation>
+			</field>
+			<field name="flags" label="Flags" size="2">
+				<interpretation>
+					<conditionalInterpretation>
+						<condition>
+							<rule>default</rule>
+							<interpretation>
+								<flagsInterpretation>
+									<flag bits="1"> <!-- bit 0 -->
+										<value>unencrypted</value> <!-- 0 -->
+										<value>encrypted</value> <!-- 1 -->
+									</flag>
+									<flag bits="2" constantValue="undefined" /> <!-- bits 1-2 -->
+									<flag bits="1"> <!-- bit 3 -->
+										<value>fields set in local header</value> <!-- 0 -->
+										<value>fields set in data descriptor</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 4 -->
+									<flag bits="1"> <!-- bit 5 -->
+										<value>not compressed patched data</value> <!-- 0 -->
+										<value>compressed patched data</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 6 -->
+										<value>no strong encryption</value> <!-- 0 -->
+										<value>strong encryption</value> <!-- 1 -->
+									</flag>
+									<flag bits="4" constantValue="unused" /> <!-- bits 7-10 -->
+									<flag bits="1"> <!-- bit 11 -->
+										<value></value> <!-- 0 -->
+										<value>UTF-8 field encoding</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 12 -->
+									<flag bits="1"> <!-- bit 13 -->
+										<value></value> <!-- 0 -->
+										<value>Local Header fields masked</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 14 -->
+									<flag bits="1" constantValue="reserved" /> <!-- bit 15 -->
+								</flagsInterpretation>
+							</interpretation>
+						</condition>
+						<condition>
+							<rule>parent->compressionMethod == 6</rule>
+							<interpretation>
+								<flagsInterpretation>
+									<flag bits="1"> <!-- bit 0 -->
+										<value>unencrypted</value> <!-- 0 -->
+										<value>encrypted</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 1 -->
+										<value>4K sliding dict</value> <!-- 0 -->
+										<value>8K sliding dict</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 2 -->
+										<value>2 Shannon-Fano trees</value> <!-- 0 -->
+										<value>3 Shannon-Fano trees</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 3 -->
+										<value>fields set in local header</value> <!-- 0 -->
+										<value>fields set in data descriptor</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 4 -->
+									<flag bits="1"> <!-- bit 5 -->
+										<value>not compressed patched data</value> <!-- 0 -->
+										<value>compressed patched data</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 6 -->
+										<value>no strong encryption</value> <!-- 0 -->
+										<value>strong encryption</value> <!-- 1 -->
+									</flag>
+									<flag bits="4" constantValue="unused" /> <!-- bits 7-10 -->
+									<flag bits="1"> <!-- bit 11 -->
+										<value></value> <!-- 0 -->
+										<value>UTF-8 field encoding</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="unused" /> <!-- bit 12 -->
+									<flag bits="1"> <!-- bit 13 -->
+										<value></value> <!-- 0 -->
+										<value>Local Header fields masked</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 14 -->
+									<flag bits="1" constantValue="reserved" /> <!-- bit 15 -->
+								</flagsInterpretation>
+							</interpretation>
+						</condition>
+						<condition>
+							<rule>parent->compressionMethod == 8 || compressionMethod == 9</rule>
+							<interpretation>
+								<flagsInterpretation>
+									<flag bits="1"> <!-- bit 0 -->
+										<value>unencrypted</value> <!-- 0 -->
+										<value>encrypted</value> <!-- 1 -->
+									</flag>
+									<flag bits="2"> <!-- bits 1-2 -->
+										<value>normal compression</value> <!-- 0 -->
+										<value>maximum compression</value> <!-- 1 -->
+										<value>fast compression</value> <!-- 2 -->
+										<value>super fast compression</value> <!-- 3 -->
+									</flag>
+									<flag bits="1"> <!-- bit 3 -->
+										<value>fields set in local header</value> <!-- 0 -->
+										<value>fields set in data descriptor</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 4 -->
+									<flag bits="1"> <!-- bit 5 -->
+										<value>not compressed patched data</value> <!-- 0 -->
+										<value>compressed patched data</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 6 -->
+										<value>no strong encryption</value> <!-- 0 -->
+										<value>strong encryption</value> <!-- 1 -->
+									</flag>
+									<flag bits="4" constantValue="unused" /> <!-- bits 7-10 -->
+									<flag bits="1"> <!-- bit 11 -->
+										<value></value> <!-- 0 -->
+										<value>UTF-8 field encoding</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 12 -->
+									<flag bits="1"> <!-- bit 13 -->
+										<value></value> <!-- 0 -->
+										<value>Local Header fields masked</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 14 -->
+									<flag bits="1" constantValue="reserved" /> <!-- bit 15 -->
+								</flagsInterpretation>
+							</interpretation>
+						</condition>
+						<condition>
+							<rule>parent->compressionMethod == 14</rule>
+							<interpretation>
+								<flagsInterpretation>
+									<flag bits="1"> <!-- bit 0 -->
+										<value>unencrypted</value> <!-- 0 -->
+										<value>encrypted</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 1 -->
+										<value>4K sliding dict</value> <!-- 0 -->
+										<value>8K sliding dict</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 2 -->
+										<value>2 Shannon-Fano trees</value> <!-- 0 -->
+										<value>3 Shannon-Fano trees</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 3 -->
+										<value>fields set in local header</value> <!-- 0 -->
+										<value>fields set in data descriptor</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 4 -->
+									<flag bits="1"> <!-- bit 5 -->
+										<value>not compressed patched data</value> <!-- 0 -->
+										<value>compressed patched data</value> <!-- 1 -->
+									</flag>
+									<flag bits="1"> <!-- bit 6 -->
+										<value>no strong encryption</value> <!-- 0 -->
+										<value>strong encryption</value> <!-- 1 -->
+									</flag>
+									<flag bits="4" constantValue="unused" /> <!-- bits 7-10 -->
+									<flag bits="1"> <!-- bit 11 -->
+										<value></value> <!-- 0 -->
+										<value>UTF-8 field encoding</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="unused" /> <!-- bit 12 -->
+									<flag bits="1"> <!-- bit 13 -->
+										<value></value> <!-- 0 -->
+										<value>Local Header fields masked</value> <!-- 1 -->
+									</flag>
+									<flag bits="1" constantValue="reserved" /> <!-- bit 14 -->
+									<flag bits="1" constantValue="reserved" /> <!-- bit 15 -->
+								</flagsInterpretation>
+							</interpretation>
+						</condition>
+					</conditionalInterpretation>
+				</interpretation>
+			</field>
+			<field name="compressionMethod" label="Compression method" size="2">
+				<interpretation>
+					<enumInterpretation>
+						<exclHex />
+						<littleEndian />
+
+						<enum id="default" value="unknown" />
+						<enum id="0" value="no compression" />
+						<enum id="1" value="shrunk" />
+						<enum id="2" value="reduced with compression factor 1" />
+						<enum id="3" value="reduced with compression factor 2" />
+						<enum id="4" value="reduced with compression factor 3" />
+						<enum id="5" value="reduced with compression factor 4" />
+						<enum id="6" value="imploded" />
+						<enum id="7" value="reserved" />
+						<enum id="8" value="deflated" />
+						<enum id="9" value="enhanced deflated" />
+						<enum id="10" value="PKWare DCL imploded" />
+						<enum id="11" value="reserved" />
+						<enum id="12" value="compressed using BZIP2" />
+						<enum id="13" value="reserved" />
+						<enum id="14" value="LZMA" />
+						<enum id="15" value="reserved" />
+						<enum id="16" value="reserved" />
+						<enum id="17" value="reserved" />
+						<enum id="18" value="compressed using IBM TERSE" />
+						<enum id="19" value="IBM LZ77 z" />
+						<enum id="20" value="deprecated" />
+						<enum id="93" value="Zstandard" />
+						<enum id="94" value="MP3" />
+						<enum id="95" value="XZ" />
+						<enum id="96" value="JPEG variant" />
+						<enum id="97" value="WavPack" />
+						<enum id="98" value="PPMd version I, Rev 1" />
+						<enum id="99" value="AE-x encryption marker" />
+					</enumInterpretation>
+				</interpretation>
+			</field>
+			<field name="fileModificationTime" label="File modification time" size="2">
+				<interpretation>
+					<msdosTimeInterpretation />
+				</interpretation>
+			</field>
+			<field name="fileModificationDate" label="File modification date" size="2">
+				<interpretation>
+					<msdosDateInterpretation />
+				</interpretation>
+			</field>
+			<field name="crc32Checksum" label="CRC-32 checksum" size="4">
+				<interpretation>
+					<hexInterpretation />
+				</interpretation>
+			</field>
+			<field name="compressedSize" label="Compressed size" size="4">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="uncompressedSize" label="Uncompressed size" size="4">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="fileNameLength" label="File name length" size="2">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="extraFieldLength" label="Extra field length" size="2">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="fileCommentLength" label="File comment length" size="2">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="diskNoStart" label="Disk # start" size="2">
+				<interpretation>
+					<intInterpretation>
+						<exclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="internalAttributes" label="Internal attributes" size="2">
+				<interpretation><hexInterpretation /></interpretation>
+			</field>
+			<field name="externalAttributes" label="External attributes" size="4">
+				<interpretation><hexInterpretation /></interpretation>
+			</field>
+			<field name="localHeaderOffset" label="Offset of local header" size="4">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="fileName" label="File name" sizeExpr="parent->fileNameLength">
+				<interpretation><asciiInterpretation /></interpretation>
+			</field>
+			<!-- TODO: This can be broken down more -->
+			<field name="centralExtraFields" label="Extra field" sizeExpr="parent->extraFieldLength">
+				<interpretation><hexInterpretation /></interpretation>
+			</field>
+			<field name="fileComment" label="File comment" sizeExpr="parent->fileCommentLength">
+				<interpretation><asciiInterpretation /></interpretation>
+			</field>
+		</sequence>
+	</section>
+
+	<section name="endOfCentralDirectoryRecord" label="End of Central Directory Record">
+		<interpretation><nullInterpretation /></interpretation>
+		<sequence>
+			<field name="signature" label="Signature" size="4">
+				<interpretation><hexInterpretation /></interpretation>
+			</field>
+			<field name="diskNum" label="Disk #" size="2">
+				<interpretation>
+					<intInterpretation>
+						<exclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="diskNumWithCentralDirectory" label="Disk # w/ central directory" size="2">
+				<interpretation>
+					<intInterpretation>
+						<exclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="diskEntries" label="Disk entries" size="2">
+				<interpretation>
+					<intInterpretation>
+						<exclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="totalEntries" label="Total entries" size="2">
+				<interpretation>
+					<intInterpretation>
+						<exclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="centralDirectorySize" label="Central directory size" size="4">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="centralDirectoryOffset" label="Offset of central directory from starting disk" size="4">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="zipFileCommentLength" label="Zip file comment length" size="2">
+				<interpretation>
+					<intInterpretation>
+						<inclHex />
+						<littleEndian />
+					</intInterpretation>
+				</interpretation>
+			</field>
+			<field name="zipFileComment" label="Zip file comment" sizeExpr="parent->zipFileCommentLength">
+				<interpretation><asciiInterpretation /></interpretation>
+			</field>
+		</sequence>
+	</section>
+</hff>
